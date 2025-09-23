@@ -5,9 +5,9 @@ import { AppSidebar } from '@/components/app-sidebar';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
         <SidebarProvider>
-            <div className="flex h-screen">
+            <div className="flex h-screen w-full">
                 <AppSidebar />
-                <div className="flex-1 p-6 overflow-auto">
+                <div className="flex-1 p-6 overflow-auto w-full">
                     <SidebarTrigger className="mb-4" />
                     {children}
                 </div>

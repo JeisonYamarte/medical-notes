@@ -1,10 +1,41 @@
+import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { FileEdit, Link, Search } from "lucide-react";
 
+import { CardDashboard } from "@/components/cardDashboard";
 
 export default function DashboardPage() {
     return (
-        <div>
-            <h2 className="text-xl font-bold mb-4">Welcome to your Dashboard</h2>
-            <p>This is where you can manage your settings and view your data.</p>
+        <div className="p-4 bg-gray-100 min-h-screen w-full">
+            <h2 className="text-xl font-bold mb-4">Dashboard</h2>             
+            <div className="grid grid-cols-4 grid-rows-5 gap-4 w-full h-full">
+                <div className="flex flex-col justify-center p-4 col-span-4 bg-white rounded-xl h-[110px]">
+                    <h2 className="font-semibold">Acciones rapidas</h2>
+                    <div className="flex">
+                        <Button className="m-2 bg-blue-500"><FileEdit className="mr-1" />Nueva Nota</Button>
+                        <Button variant={'outline'} className="m-2"><Link className="mr-1" />Subir PDF</Button>
+                        <Button variant={'outline'} className="m-2"><Search className="mr-1" />Buscar nota</Button>
+                    </div>
+                </div>
+                <div className="col-span-2 row-span-4 row-start-2 bg-white rounded-xl h-auto">
+                    <div className="max-w-[360px] mx-auto gap-2 h-full p-4 flex flex-col">
+                        <h2 className="font-semibold">Notas Recientes</h2>
+                        <ScrollArea className="flex flex-col gap-2 max-h-[480px]">
+                            <div className="grid grid-cols-1 gap-2">
+                                <CardDashboard title="Consulta con el Dr. Smith" titleNote="Revisión anual y chequeo de presión arterial." date="2024-10-01" />
+                                <CardDashboard title="Resultados de laboratorio" titleNote="Análisis de sangre y orina." date="2024-09-25" />
+                                <CardDashboard title="Vacunación contra la gripe" titleNote="Primera dosis administrada." date="2024-09-15" />
+                                <CardDashboard title="Consulta con el Dr. Lee" titleNote="Seguimiento de la alergia estacional." date="2024-09-10" />
+                                <CardDashboard title="Examen de visión" titleNote="Actualización de la receta de lentes." date="2024-08-30" />
+                                <CardDashboard title="Consulta con el Dr. Patel" titleNote="Dolor de espalda y recomendaciones de fisioterapia." date="2024-08-20" />
+                                <CardDashboard title="Chequeo dental" titleNote="Limpieza y revisión de caries." date="2024-08-15" />
+                                <CardDashboard title="Consulta con el Dr. Gomez" titleNote="Control de diabetes y ajuste de medicación." date="2024-08-05" />
+                            </div>
+                        </ScrollArea>
+                    </div>
+                </div>
+                <div className="col-span-2 row-span-4 col-start-3 row-start-2 bg-white rounded-xl">3</div>
+            </div>
         </div>
     );
 }
