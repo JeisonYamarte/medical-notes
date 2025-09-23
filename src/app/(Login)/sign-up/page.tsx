@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Eye, EyeOff, Lock } from "lucide-react";
+import { Mail, Eye, EyeOff, Lock} from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -18,16 +18,20 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
-const SignInSchema = z.object({
+const SignUpSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters long"),
-});
+    confirmPassword: z.string().min(6, "Password must be at least 6 characters long"),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+})
 
-type FormData = z.infer<typeof SignInSchema>;
+type FormData = z.infer<typeof SignUpSchema>;
 
-export default function SignIn() {
+export default function SignUp() {
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
-        resolver: zodResolver(SignInSchema),
+        resolver: zodResolver(SignUpSchema),
     })
 
     const onSubmit = (data: FormData) => {
@@ -37,14 +41,13 @@ export default function SignIn() {
 
     return (
         <>
-            <Card className="w-[360px] h-auto flex flex-col gap-10">
+            <Card className="w-[360px] h-auto flex flex-col gap-10 py-10">
                 <CardHeader className="flex flex-col items-center justify-center gap-2">
-                    <img className="w-20 h-20" src="https://cdn-icons-png.flaticon.com/512/11711/11711702.png" alt="Logo"  />
-                    <CardTitle className="text-2xl font-bold">Bienvenido de nuevo</CardTitle>
-                    <CardDescription >Inicie sesión en su cuenta para continuar.</CardDescription>
+                    <CardTitle className="text-2xl font-bold">Crea tu cuenta</CardTitle>
+                    <CardDescription className="text-center">Únete a Medical Notes para gestionar tus registros médicos de forma eficiente.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
-                    <form id="formSignIn" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+                    <form id="formSignUp" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
                         <div className="grid gap-2">
                             <Label htmlFor="email">Email</Label>
                             <div className="relative w-full">
@@ -72,17 +75,29 @@ export default function SignIn() {
                                 required
                                 {...register("password")} 
                             /> {/* falta el showPassword */}
-                        </div>
+                            </div>
                             {errors.password && <span className="text-red-500">{errors.password.message}</span>}
                         </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="confirmPassword">Confirm Password</Label>
+                            <div className="relative w-full">
+                                <Lock className="absolute scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
+                                <Input
+                                className="pl-10 pr-3 py-2"
+                                id="confirmPassword"
+                                type="password"
+                                placeholder="confirm password"
+                                required
+                                {...register("confirmPassword")} 
+                            /> {/* falta el showPassword */}
+                            </div>
+                            {errors.confirmPassword && <span className="text-red-500">{errors.confirmPassword.message}</span>}
+                        </div>
                     </form>
-                    <div className="flex items-end justify-end">
-                        <CardAction className=" text-blue-500 font-semibold ">¿Olvidó su contraseña?</CardAction>
-                    </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4 justify-center items-center">
-                    <Button type="submit" form="formSignIn" className="bg-blue-500 w-full">Iniciar Sesion</Button>
-                    <CardAction className="w-auto mx-auto font-semibold">¿No tienes una cuenta? <Link className="text-blue-500" href="/sign-up">Regístrate</Link></CardAction>
+                    <Button type="submit" form="formSignUp" className="bg-blue-500 w-full">Iniciar Sesion</Button>
+                    <CardAction className="w-auto mx-auto font-semibold">¿Ya tienes una cuenta? <Link className="text-blue-500" href="/sign-in">Iniciar Sesión</Link></CardAction>
                 </CardFooter>
             </Card>
         </>

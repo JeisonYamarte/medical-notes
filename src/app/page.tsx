@@ -24,7 +24,7 @@ export default function Home() {
           </div>
           <div className="flex gap-2 mx-auto"> 
             <Button className=" w-35 text-xs bg-blue-500" onClick={() => {router.push('./sign-in')}}>iniciar Sesion <MoveRight className="inline" /></Button>
-            <Button variant="outline" className=" w-30 text-xs" onClick={() => {router.push('./sign-in')}}>Registrarse</Button>
+            <Button variant="outline" className=" w-30 text-xs" onClick={() => {router.push('./sign-up')}}>Registrarse</Button>
           </div>
         </div>
       </header>
