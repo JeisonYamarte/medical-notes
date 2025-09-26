@@ -18,12 +18,20 @@ import {
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
 import { Search, PlusCircle, Calendar as CalendarIcon, ArrowUpNarrowWide } from "lucide-react";
 
 enum NoteStatus {
@@ -131,7 +139,7 @@ export default function NotesPage() {
     }
 
     return (
-        <div className="p-4 bg-gray-100 min-h-screen w-full rounded-xl gap-5 flex flex-col">
+        <div className="p-4 bg-gray-100 min-h-screen w-full rounded-xl gap-5 flex flex-col border-2 border-gray-200">
             <div className="flex items-center justify-between mt-4 px-3 w-full">
                 <h2 className="text-xl font-bold mb-4">Note List</h2>
                 <div className="relative">
@@ -188,30 +196,48 @@ export default function NotesPage() {
                 </div>
             </div>
             {/* Mejorar tabla con https://tanstack.com/table/v8 */ }
-            <div>
-                <Table>
-                    <TableHeader>
-                        <TableRow className="">
-                            <TableHead>PACIENTE</TableHead>
-                            <TableHead>TITULO DE LA NOTA</TableHead>
-                            <TableHead>FECHA DE CREACION</TableHead>
-                            <TableHead>AUTOR</TableHead>
-                            <TableHead>ESTADO</TableHead>
+            <Table>
+                <TableHeader>
+                    <TableRow className="">
+                        <TableHead>PACIENTE</TableHead>
+                        <TableHead>TITULO DE LA NOTA</TableHead>
+                        <TableHead>FECHA DE CREACION</TableHead>
+                        <TableHead>AUTOR</TableHead>
+                        <TableHead>ESTADO</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {notesExample.map((note) => (
+                        <TableRow className=" h-10 text-lg" key={note.id}>
+                            <TableCell className="font-medium">{note.patient}</TableCell>
+                            <TableCell className="text-blue-500">{note.title}</TableCell>
+                            <TableCell>{note.date}</TableCell>
+                            <TableCell>{note.autor}</TableCell>
+                            <TableCell><span className={`${stateStyleHandler(note.status)} font-semibold rounded-full text-center p-1 px-3 border-2`}>{note.status}</span></TableCell>
                         </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {notesExample.map((note) => (
-                            <TableRow className=" h-10 text-lg" key={note.id}>
-                                <TableCell className="font-medium">{note.patient}</TableCell>
-                                <TableCell className="text-blue-500">{note.title}</TableCell>
-                                <TableCell>{note.date}</TableCell>
-                                <TableCell>{note.autor}</TableCell>
-                                <TableCell><span className={`${stateStyleHandler(note.status)} font-semibold rounded-full text-center p-1 px-3 border-2`}>{note.status}</span></TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
+                    ))}
+                </TableBody>
+            </Table>
+            <Pagination className="flex justify-center mt-4 h-10">
+                <PaginationPrevious >
+                    <Button variant="outline" className="px-3">Anterior</Button>
+                </PaginationPrevious>
+                <PaginationContent>
+                    <PaginationItem>
+                        <PaginationLink className="px-3" href="#" aria-label="Go to page 1">1</PaginationLink>
+                    </PaginationItem>
+                    <PaginationItem>
+                        <PaginationLink className="px-3" href="#" aria-label="Go to page 2" isActive>2</PaginationLink>
+                    </PaginationItem>
+                    <PaginationEllipsis />
+                    <PaginationItem>
+                        <PaginationLink className="px-3" href="#" aria-label="Go to page 5">5</PaginationLink>
+                    </PaginationItem>
+                </PaginationContent>
+                <PaginationNext >
+                    <Button variant="outline" className="px-3">Siguiente</Button>
+                </PaginationNext>
+            </Pagination>
         </div>
     );
 }
