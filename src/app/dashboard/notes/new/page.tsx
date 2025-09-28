@@ -180,7 +180,7 @@ export default function NewNotePage() {
                 </div>
                 <div className="w-1/3 flex gap-3 flex-col border-1 border-gray-300 p-3 rounded-lg max-w-[400px] justify-center items-center">
                     <h2 className="text-lg font-semibold">Contextos o referencias</h2>
-                        <div className='h-full w-full border-3 border-dashed border-gray-300 max-w-[300px] rounded-lg text-center items-center' {...getRootProps()}>
+                    <div className='h-full w-full border-3 border-dashed border-gray-300 max-w-[300px] rounded-lg text-center items-center' {...getRootProps()}>
                         <input {...getInputProps()} />
                         {
                             isDragActive ?
