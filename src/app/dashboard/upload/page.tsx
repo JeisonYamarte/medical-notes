@@ -3,8 +3,11 @@ import React, { useCallback} from 'react'
 import {useDropzone} from 'react-dropzone'
 import { CloudUpload } from 'lucide-react'
 
-import { CardListPDF } from '@/components/cardListPDF'
 import { Button } from '@/components/ui/button'
+
+import { CardListPDF } from '@/components/cardListPDF'
+import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
+import App from 'next/app'
 
 
 export default function UploadPage() {
@@ -42,10 +45,16 @@ export default function UploadPage() {
                     </div>
                 </div>
             </main>
-            <aside className='w-1/3'>
+            <aside className='w-1/3 max-w-sm'>
                 <h2 className="text-xl font-bold mb-4">PDFs subidos</h2>
-                <div className='flex flex-col items-start w-full min-h-max border-2 border-gray-300  rounded-lg bg-gray-50 cursor-pointer p-10 gap-5'>
-                    <p className='text-gray-500'>No hay archivos subidos aún.</p>
+                <div className='flex flex-col items-start w-full border-2 border-gray-300  rounded-lg bg-gray-50 cursor-pointer p-3 gap-5 h-[500px] overflow-y-auto'>
+                    {acceptedFiles.length > 0 ? (
+                        acceptedFiles.map((file) => (
+                            <CardPDFsUpload key={file.name} title={file.name} date={file.lastModified ? new Date(file.lastModified).toLocaleDateString() : ''} size={file.size} />
+                        ))
+                    ) : (
+                        <p className='text-gray-500'>No hay archivos subidos aún.</p>
+                    )}
                 </div>
             </aside>
         </div>
