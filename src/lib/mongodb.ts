@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
 import './envConfig'
 
-console.log('Conectando a MongoDB:', process.env.MONGODB_URI);
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-console.log('MONGO_URI:', MONGODB_URI);
+
 
 
 if (!MONGODB_URI) {

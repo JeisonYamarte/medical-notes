@@ -15,13 +15,22 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input";
 
 const SignUpSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters long").max(50, "Name must be at most 50 characters long"),
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters long"),
     confirmPassword: z.string().min(6, "Password must be at least 6 characters long"),
+    birthday: z.string().min(1, "Birthday is required"),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
@@ -30,12 +39,46 @@ const SignUpSchema = z.object({
 type FormData = z.infer<typeof SignUpSchema>;
 
 export default function SignUp() {
-    const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    const form = useForm<FormData>({
         resolver: zodResolver(SignUpSchema),
+        defaultValues: {
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+            birthday: "",
+        },
     })
 
     const onSubmit = (data: FormData) => {
         console.log('Formulario Enviado',data);
+        const newUser = {
+            name: data.name,
+            email: data.email,
+            password: data.password,
+            birthday: data.birthday,
+        }
+        fetch('/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newUser),
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('Usuario creado exitosamente:', result.data);
+                // Aquí puedes redirigir al usuario o mostrar un mensaje de éxito
+            } else {
+                console.error('Error creando el usuario:', result.error);
+                // Aquí puedes mostrar un mensaje de error al usuario
+            }
+        })
+        .catch(error => {
+            console.error('Error en la solicitud:', error);
+            // Aquí puedes manejar errores de red u otros errores inesperados
+        });
     }
 
 
@@ -47,57 +90,115 @@ export default function SignUp() {
                     <CardDescription className="text-center">Únete a Medical Notes para gestionar tus registros médicos de forma eficiente.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
-                    <form id="formSignUp" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
-                            <div className="relative w-full">
-                                <Mail className="absolute scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
-                                <Input
-                                className="pl-10 pr-3 py-2"
-                                id="email"
-                                type="email"
-                                placeholder="m@example.com"
-                                required
-                                {...register("email")} 
+                    <Form {...form}>
+                        <form id="formSignUp" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel htmlFor="name">Nombre</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                id="name"
+                                                type="text"
+                                                placeholder="Tu nombre completo"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            </div>
-                            {errors.email && <span className="text-red-500">{errors.email.message}</span>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <div className="relative w-full">
-                                <Lock className="absolute scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
-                                <Input
-                                className="pl-10 pr-3 py-2"
-                                id="password"
-                                type="password"
-                                placeholder="Password"
-                                required
-                                {...register("password")} 
-                            /> {/* falta el showPassword */}
-                            </div>
-                            {errors.password && <span className="text-red-500">{errors.password.message}</span>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="confirmPassword">Confirm Password</Label>
-                            <div className="relative w-full">
-                                <Lock className="absolute scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
-                                <Input
-                                className="pl-10 pr-3 py-2"
-                                id="confirmPassword"
-                                type="password"
-                                placeholder="confirm password"
-                                required
-                                {...register("confirmPassword")} 
-                            /> {/* falta el showPassword */}
-                            </div>
-                            {errors.confirmPassword && <span className="text-red-500">{errors.confirmPassword.message}</span>}
-                        </div>
-                    </form>
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel htmlFor="email">Email</FormLabel>
+                                        <div className="relative w-full">
+                                            <Mail className="absolute scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
+                                            <FormControl>
+                                                <Input
+                                                    className="pl-10 pr-3 py-2"
+                                                    id="email"
+                                                    type="email"
+                                                    placeholder="m@example.com"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel htmlFor="password">Password</FormLabel>
+                                        <div className="relative w-full">
+                                            <Lock className="absolute scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
+                                            <FormControl>
+                                                <Input
+                                                    className="pl-10 pr-3 py-2"
+                                                    id="password"
+                                                    type="password"
+                                                    placeholder="Password"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="confirmPassword"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+                                        <div className="relative w-full">
+                                            <Lock className="absolute scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
+                                            <FormControl>
+                                                <Input
+                                                    className="pl-10 pr-3 py-2"
+                                                    id="confirmPassword"
+                                                    type="password"
+                                                    placeholder="Confirm password"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="birthday"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel htmlFor="birthday">Fecha de nacimiento</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                id="birthday"
+                                                type="date"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </form>
+                    </Form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4 justify-center items-center">
                     <Button type="submit" form="formSignUp" className="bg-blue-500 w-full">Iniciar Sesion</Button>
-                    <CardAction className="w-auto mx-auto font-semibold">¿Ya tienes una cuenta? <Link className="text-blue-500" href="/sign-in">Iniciar Sesión</Link></CardAction>
+                    <CardAction className="w-auto mx-auto font-semibold">¿Ya tienes una cuenta? <Link className="text-blue-500" href="/sign-in">Create Account</Link></CardAction>
                 </CardFooter>
             </Card>
         </>
