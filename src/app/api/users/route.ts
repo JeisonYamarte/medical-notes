@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/model/user";
+import { validateRequest } from "@/lib/validateRequest";
+import { userSchema } from "@/lib/schemas/userSchema";
 
 export async function GET(request: NextRequest) {
     try {
@@ -27,6 +29,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try{
+        validateRequest(request, userSchema);
         await connectDB();
         const { email, name, password, birthday } = await request.json();
         
