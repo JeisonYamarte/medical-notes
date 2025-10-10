@@ -1,4 +1,5 @@
 "use client"
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Lock } from "lucide-react";
@@ -26,6 +27,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 export default function SignUp() {
+        const [emailExists, setEmailExists] = React.useState(false);
+
     const form = useForm<SignUpType>({
         resolver: zodResolver(signUpSchema),
         defaultValues: {
@@ -42,7 +45,7 @@ export default function SignUp() {
         const newUser = {
             name: data.name,
             email: data.email,
-            password: 656,
+            password: data.password,
             birthday: data.birthday,
         }
         fetch('/api/users', {
@@ -59,7 +62,9 @@ export default function SignUp() {
                 // Aquí puedes redirigir al usuario o mostrar un mensaje de éxito
             } else {
                 console.error('Error creando el usuario:', result.error);
-                // Aquí puedes mostrar un mensaje de error al usuario
+                if (result.error === 409) {
+                    setEmailExists(true);
+                }
             }
         })
         .catch(error => {
@@ -115,6 +120,11 @@ export default function SignUp() {
                                                 />
                                             </FormControl>
                                         </div>
+                                        {emailExists && (
+                                            <FormMessage>
+                                                El correo electrónico ya está en uso.
+                                            </FormMessage>
+                                        )}
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -184,8 +194,8 @@ export default function SignUp() {
                     </Form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4 justify-center items-center">
-                    <Button type="submit" form="formSignUp" className="bg-blue-500 w-full">Iniciar Sesion</Button>
-                    <CardAction className="w-auto mx-auto font-semibold">¿Ya tienes una cuenta? <Link className="text-blue-500" href="/sign-in">Create Account</Link></CardAction>
+                    <Button type="submit" form="formSignUp" className="bg-blue-500 w-full">create account</Button>
+                    <CardAction className="w-auto mx-auto font-semibold">¿Ya tienes una cuenta? <Link className="text-blue-500" href="/sign-in">Iniciar Sesion</Link></CardAction>
                 </CardFooter>
             </Card>
         </>

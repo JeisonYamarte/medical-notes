@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/model/user";
 import { validateRequest } from "@/lib/validateRequest";
-import { userSchema } from "@/lib/schemas/userSchema";
+import { userSchema, UserType } from "@/lib/schemas/userSchema";
+//import type { UserS } from "@/lib/schemas/userSchema"
 
 export async function GET(request: NextRequest) {
     try {
@@ -29,36 +30,27 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try{
-        validateRequest(request, userSchema);
+
+        const { data, error } = await validateRequest<UserType>(request, userSchema);
         await connectDB();
-        const { email, name, password, birthday } = await request.json();
-        
-        if (!email || !name || !password || !birthday) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: 'Faltan campos requeridos',
-                },
-                { status: 400 }
-            );
+
+        if (error || !data) {
+            return error;
         }
 
-        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        const existingUser = await User.findOne({ email: data.email.toLowerCase() });
         if (existingUser) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'El correo electrónico ya está en uso',
+                    error: 409,
                 },
-                { status: 400 }
+                { status: 409 }
             );
         }
 
         const newUser = new User({
-            email,
-            name,
-            password,
-            birthday,
+            ...data
         });
         await newUser.save();
 
