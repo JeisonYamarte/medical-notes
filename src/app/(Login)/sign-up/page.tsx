@@ -48,7 +48,7 @@ export default function SignUp() {
             password: data.password,
             birthday: data.birthday,
         }
-        fetch('/api/users', {
+        fetch('/api/auth/singup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
