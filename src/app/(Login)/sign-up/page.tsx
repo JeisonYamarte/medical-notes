@@ -27,7 +27,6 @@ import {
 import { Input } from "@/components/ui/input";
 
 export default function SignUp() {
-        const [emailExists, setEmailExists] = React.useState(false);
 
     const form = useForm<SignUpType>({
         resolver: zodResolver(signUpSchema),
@@ -48,7 +47,7 @@ export default function SignUp() {
             password: data.password,
             birthday: data.birthday,
         }
-        fetch('/api/auth/singup', {
+        fetch('/api/auth/signup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -63,7 +62,7 @@ export default function SignUp() {
             } else {
                 console.error('Error creando el usuario:', result.error);
                 if (result.error === 409) {
-                    setEmailExists(true);
+                    form.setError("email", { type: "manual", message: "El correo electrónico ya está en uso." });
                 }
             }
         })
@@ -120,11 +119,6 @@ export default function SignUp() {
                                                 />
                                             </FormControl>
                                         </div>
-                                        {emailExists && (
-                                            <FormMessage>
-                                                El correo electrónico ya está en uso.
-                                            </FormMessage>
-                                        )}
                                         <FormMessage />
                                     </FormItem>
                                 )}

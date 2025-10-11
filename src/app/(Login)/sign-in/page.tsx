@@ -1,4 +1,5 @@
 "use client"
+import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,8 +44,27 @@ export default function SignIn() {
 
     const onSubmit = (data: FormData) => {
         console.log('Formulario Enviado',data);
-    }
-
+        fetch('/api/auth/signin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('Inicio de sesión exitoso:', result.data);
+                // Aquí puedes redirigir al usuario o actualizar el estado de la aplicación
+            } else {
+                console.error('Error en el inicio de sesión:', result.error);
+                if (result.error === 401) {
+                    form.setError("email", { type: "manual", message: "Credenciales inválidas" });
+                    form.setError("password", { type: "manual", message: "Credenciales inválidas" });
+                }
+            }
+        });
+    };
 
     return (
         <>
