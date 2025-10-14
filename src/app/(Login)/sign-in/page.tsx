@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Lock } from "lucide-react";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 import {
     Card,
@@ -34,6 +36,7 @@ const SignInSchema = z.object({
 type FormData = z.infer<typeof SignInSchema>;
 
 export default function SignIn() {
+    const router = useRouter();
     const form = useForm<FormData>({
         resolver: zodResolver(SignInSchema),
         defaultValues: {
@@ -42,28 +45,23 @@ export default function SignIn() {
         },
     })
 
-    const onSubmit = (data: FormData) => {
+    const onSubmit = async (data: FormData) => {
         console.log('Formulario Enviado',data);
-        fetch('/api/auth/signin', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
+        const res = await signIn("credentials", {
+            email: data.email,
+            password: data.password,
+            redirect: false,
         })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                console.log('Inicio de sesión exitoso:', result.data);
-                // Aquí puedes redirigir al usuario o actualizar el estado de la aplicación
-            } else {
-                console.error('Error en el inicio de sesión:', result.error);
-                if (result.error === 401) {
-                    form.setError("email", { type: "manual", message: "Credenciales inválidas" });
-                    form.setError("password", { type: "manual", message: "Credenciales inválidas" });
-                }
+
+        if (res?.error) {
+            if (res.status === 401) {
+                form.setError("email", { type: "manual", message: "Credenciales inválidas" });
+                form.setError("password", { type: "manual", message: "Credenciales inválidas" });
             }
-        });
+        } else {
+            router.push("/dashboard");
+        }
+
     };
 
     return (
