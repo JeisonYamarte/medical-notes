@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { HomeIcon, FileText, CloudUpload, Settings, LogOut} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 
 
@@ -49,11 +50,9 @@ const items = [
 
 function AppSidebar() {
     const router = useRouter();
-    const signOut = () => {
-        // Aquí iría la lógica para cerrar sesión, como limpiar tokens, redirigir, etc.
-        console.log("User signed out");
-        // Por ejemplo, podrías redirigir al usuario a la página de inicio de sesión:
-        router.push('/');
+    const handleSignOut = () => {
+        signOut();
+        router.push('/sign-in');
     };
 
     return (
@@ -81,7 +80,7 @@ function AppSidebar() {
                     </SidebarGroupContent>
                     </SidebarGroup>
                     <SidebarFooter className="mt-auto mb-5">
-                        <Button onClick={signOut} className="bg-red-500"><LogOut />Logout</Button>
+                        <Button onClick={handleSignOut} className="bg-red-500"><LogOut />Logout</Button>
                     </SidebarFooter>
                 </SidebarContent>
             </Sidebar>

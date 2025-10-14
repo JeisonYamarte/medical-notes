@@ -1,14 +1,22 @@
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileEdit, Link, Search } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 import { CardDashboard } from "@/components/cardDashboard";
 import { CardPdfResume } from "@/components/cardPdfResume";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+    const session = await getServerSession(authOptions);
+    console.log('session:', session);
+    
     return (
         <div className="p-4 bg-gray-100 min-h-screen w-full rounded-xl">
-            <h2 className="text-xl font-bold mb-4">Dashboard</h2>             
+            <div>
+                <h2 className="text-xl font-bold mb-4">Dashboard</h2>             
+                <p className="text-gray-600 mb-6">Bienvenido a tu panel de control, {session?.user?.name}!</p>
+            </div>
             <div className="grid grid-cols-4 grid-rows-5 gap-4 w-full h-full">
                 <div className="flex flex-col justify-center p-4 col-span-4 bg-white rounded-xl h-[110px]">
                     <h2 className="font-semibold">Acciones rapidas</h2>
