@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Lock } from "lucide-react";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 import { signUpSchema, SignUpType } from '@/lib/schemas/authScchema';
 import {
@@ -55,10 +57,15 @@ export default function SignUp() {
             body: JSON.stringify(newUser),
         })
         .then(response => response.json())
-        .then(result => {
+        .then(async result => {
             if (result.success) {
                 console.log('Usuario creado exitosamente:', result.data);
-                // Aquí puedes redirigir al usuario o mostrar un mensaje de éxito
+                const res = await signIn("credentials", {
+                    email: data.email,
+                    password: data.password,
+                    redirect: false,
+                })
+                
             } else {
                 console.error('Error creando el usuario:', result.error);
                 if (result.error === 409) {
@@ -68,7 +75,7 @@ export default function SignUp() {
         })
         .catch(error => {
             console.error('Error en la solicitud:', error);
-            // Aquí puedes manejar errores de red u otros errores inesperados
+            form.setError("email", { type: "manual", message: "Error en la solicitud." });
         });
     }
 
