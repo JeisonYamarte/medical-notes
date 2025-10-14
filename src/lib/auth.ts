@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GithubProvider from "next-auth/providers/github"
 import bcrypt from "bcryptjs";
 import { connectDB } from "./mongodb";
 import User from "@/model/user";
@@ -35,6 +36,11 @@ export const authOptions: NextAuthOptions = {
             };
         },
         }),
+        GithubProvider({
+            name: "GitHub",
+            clientId: process.env.GITHUB_ID || "",
+            clientSecret: process.env.GITHUB_SECRET || "",
+        })
     ],
 
     session: {

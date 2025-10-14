@@ -1,6 +1,5 @@
 "use client"
 import React from "react";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Lock } from "lucide-react";
@@ -28,17 +27,17 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input";
 
-const SignInSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters long"),
-});
+import { signInSchema, type SignInType } from "@/lib/schemas/authScchema";
 
-type FormData = z.infer<typeof SignInSchema>;
+
+type FormData = SignInType;
 
 export default function SignIn() {
+
+    
     const router = useRouter();
     const form = useForm<FormData>({
-        resolver: zodResolver(SignInSchema),
+        resolver: zodResolver(signInSchema),
         defaultValues: {
             email: "",
             password: "",
@@ -63,6 +62,19 @@ export default function SignIn() {
         }
 
     };
+
+    const SignInGithub = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        const res  = await signIn("github", { redirect: false });
+
+        
+        await console.log("GitHub SignIn Response:", res);
+        if (res) {
+            router.push("/dashboard"); 
+        } else {
+            form.setError("email", { type: "manual", message: "Error al iniciar sesión con GitHub" });
+        }
+    }
 
     return (
         <>
@@ -127,6 +139,7 @@ export default function SignIn() {
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4 justify-center items-center">
                     <Button type="submit" form="formSignIn" className="bg-blue-500 w-full">Iniciar Sesion</Button>
+                    <Button variant="outline" className="w-full" onClick={(e) => SignInGithub(e)}>Iniciar con GitHub</Button>
                     <CardAction className="w-auto mx-auto font-semibold">¿No tienes una cuenta? <Link className="text-blue-500" href="/sign-up">Regístrate</Link></CardAction>
                 </CardFooter>
             </Card>
