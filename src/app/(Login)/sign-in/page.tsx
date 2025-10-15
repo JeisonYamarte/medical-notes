@@ -63,17 +63,9 @@ export default function SignIn() {
 
     };
 
-    const SignInGithub = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const SignInGoogle = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        const res  = await signIn("github", { redirect: false });
-
-        
-        await console.log("GitHub SignIn Response:", res);
-        if (res) {
-            router.push("/dashboard"); 
-        } else {
-            form.setError("email", { type: "manual", message: "Error al iniciar sesión con GitHub" });
-        }
+        const res  = await signIn("google", { redirect: false });
     }
 
     return (
@@ -139,7 +131,7 @@ export default function SignIn() {
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4 justify-center items-center">
                     <Button type="submit" form="formSignIn" className="bg-blue-500 w-full">Iniciar Sesion</Button>
-                    <Button variant="outline" className="w-full" onClick={(e) => SignInGithub(e)}>Iniciar con GitHub</Button>
+                    <Button variant="outline" className="w-full" onClick={(e) => SignInGoogle(e)}>Iniciar con Google</Button>
                     <CardAction className="w-auto mx-auto font-semibold">¿No tienes una cuenta? <Link className="text-blue-500" href="/sign-up">Regístrate</Link></CardAction>
                 </CardFooter>
             </Card>
