@@ -1,8 +1,7 @@
 "use client"
 import { Inter } from "next/font/google";
 import { MoveRight, FileText, ShieldCheck, Cloud, Palette, UsersRound, Laptop, } from 'lucide-react';
-import { useRouter } from "next/navigation";
-import { SessionProvider } from "next-auth/react";
+import { useRouter } from "next/navigation"
 
 import { CardLandingPage } from "@/components/cardLandingPage";
 import { Button } from "@/components/ui/button"

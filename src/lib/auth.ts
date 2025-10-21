@@ -50,6 +50,31 @@ export const authOptions: NextAuthOptions = {
         strategy: "jwt",
     },
 
+    callbacks: {
+        async jwt({ token, user, account }) {
+            if (user) {
+            // para CredentialsProvider
+            token.id = user.id;
+            }
+
+            // si el proveedor es Google y no hay id todavía
+            if (account?.provider === "google" && !token.id) {
+            await connectDB();
+            const dbUser = await User.findOne({ email: token.email });
+            if (dbUser) token.id = dbUser._id.toString();
+            }
+
+            return token;
+        },
+
+        async session({ session, token }) {
+            if (token && session.user) {
+            session.user.id = token.id as string;
+            }
+            return session;
+        },
+    },
+
     pages: {
         signIn: "/sign-in",
     },

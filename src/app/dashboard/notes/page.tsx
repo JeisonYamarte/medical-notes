@@ -137,6 +137,7 @@ export default function NotesPage() {
                 return "text-green-600  bg-green-100 border-green-300";
         }
     }
+    
 
     return (
         <div className="p-4 bg-gray-100 min-h-screen w-full rounded-xl gap-5 flex flex-col border-2 border-gray-200">

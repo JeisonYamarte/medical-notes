@@ -1,6 +1,5 @@
 "use client"
 import React, { useCallback} from 'react'
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {useDropzone} from 'react-dropzone'
@@ -18,45 +17,26 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+import { noteSchema, NoteTypeEnum, UrgencyLevelEnum, NoteType} from '@/lib/schemas/noteSchema';
 
 
-enum NoteType {
-    FOLLOWUP = "Seguimiento",
-    EMERGENCY = "Emergencia",
-    CONSULTATION = "Consulta",
-}
 
-enum UrgencyLevel {
-    LOW = "Baja",
-    MEDIUM = "Media",
-    HIGH = "Alta",
-}
 
-const schema = z.object({
-    title: z.string().min(2, { message: "Título debe tener al menos 2 caracteres" }).max(100, { message: "Título debe tener máximo 100 caracteres" }),
-    content: z.string().min(10, { message: "Contenido debe tener al menos 10 caracteres" }).max(1000, { message: "Contenido debe tener máximo 1000 caracteres" }),
-    patient: z.string().min(2, { message: "Paciente es requerido" }).max(100, { message: "Paciente debe tener máximo 100 caracteres" }),
-    noteType: z.enum(NoteType, { error: (issue) => `valor invalido: ${issue.received}` }),
-    urgencyLevel: z.enum(UrgencyLevel, { error: (issue) => `valor invalido: ${issue.received}` }),
-    tags: z.array(z.string()).optional(),
-});
-
-type FormData = z.infer<typeof schema>;
 
 export default function NewNotePage() {
-    const form = useForm<FormData>({
-        resolver: zodResolver(schema),
+    const form = useForm<NoteType>({
+        resolver: zodResolver(noteSchema),
         defaultValues: {
             title: "",
             content: "",
             patient: "",
-            noteType: NoteType.FOLLOWUP,
-            urgencyLevel: UrgencyLevel.MEDIUM,
-            tags: [],
+            noteType: NoteTypeEnum.FOLLOWUP,
+            urgencyLevel: UrgencyLevelEnum.MEDIUM,
+            //tags: [],
         },
     });
 
-    const onSubmit = (data: FormData) => {
+    const onSubmit = (data: NoteType) => {
         console.log('form:',data);
     };
 
@@ -127,9 +107,9 @@ export default function NewNotePage() {
                                                                 <SelectValue placeholder="selecciona el tipo de nota" />
                                                             </SelectTrigger>
                                                             <SelectContent>
-                                                                <SelectItem value={NoteType.FOLLOWUP}>{NoteType.FOLLOWUP}</SelectItem>
-                                                                <SelectItem value={NoteType.CONSULTATION}>{NoteType.CONSULTATION}</SelectItem>
-                                                                <SelectItem value={NoteType.EMERGENCY}>{NoteType.EMERGENCY}</SelectItem>
+                                                                <SelectItem value={NoteTypeEnum.FOLLOWUP}>{NoteTypeEnum.FOLLOWUP}</SelectItem>
+                                                                <SelectItem value={NoteTypeEnum.CONSULTATION}>{NoteTypeEnum.CONSULTATION}</SelectItem>
+                                                                <SelectItem value={NoteTypeEnum.EMERGENCY}>{NoteTypeEnum.EMERGENCY}</SelectItem>
                                                             </SelectContent>
                                                     </Select>
                                                 </FormControl>
@@ -149,9 +129,9 @@ export default function NewNotePage() {
                                                                 <SelectValue placeholder="selecciona el nivel de urgencia" />
                                                             </SelectTrigger>
                                                             <SelectContent>
-                                                                <SelectItem value={UrgencyLevel.LOW}>{UrgencyLevel.LOW}</SelectItem>
-                                                                <SelectItem value={UrgencyLevel.MEDIUM}>{UrgencyLevel.MEDIUM}</SelectItem>
-                                                                <SelectItem value={UrgencyLevel.HIGH}>{UrgencyLevel.HIGH}</SelectItem>
+                                                                <SelectItem value={UrgencyLevelEnum.LOW}>{UrgencyLevelEnum.LOW}</SelectItem>
+                                                                <SelectItem value={UrgencyLevelEnum.MEDIUM}>{UrgencyLevelEnum.MEDIUM}</SelectItem>
+                                                                <SelectItem value={UrgencyLevelEnum.HIGH}>{UrgencyLevelEnum.HIGH}</SelectItem>
                                                             </SelectContent>
                                                     </Select>
                                                 </FormControl>
@@ -159,10 +139,10 @@ export default function NewNotePage() {
                                         </FormItem>
                                     )}
                                     />
-                                    <FormField
+                                    {/*<FormField
                                     control={form.control}
                                     name="tags"
-                                    render={({ field }) => (
+                                    render={({ field }) => ( 
                                         <FormItem>
                                             <FormLabel>Etiquetas</FormLabel>
                                             <FormControl>
@@ -171,7 +151,7 @@ export default function NewNotePage() {
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                    />
+                                    />*/}
                                 </div>
                             </div>
                             <Button type="submit">Guardar nota</Button>                                

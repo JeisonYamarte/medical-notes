@@ -8,12 +8,13 @@ import { AppSidebar } from '@/components/app-sidebar';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
     const session = await getServerSession(authOptions);
+    console.log('DashboardLayout session:', session);
     if (!session) {
         redirect('/sign-in');
     }
     return (
         <SidebarProvider>
-            <div className="flex h-screen w-full">
+            <div className="flex  w-full">
                 <AppSidebar />
                 <div className="flex-1 flex flex-col h-full overflow-hidden">
                     <SidebarTrigger className="mb-4 flex-shrink-0 p-6" />
