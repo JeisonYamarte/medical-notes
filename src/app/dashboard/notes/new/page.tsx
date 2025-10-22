@@ -38,6 +38,25 @@ export default function NewNotePage() {
 
     const onSubmit = (data: NoteType) => {
         console.log('form:',data);
+        fetch('/api/notes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        }).then(async (response) => {
+            if (response.ok) {
+                const resData = await response.json();
+                console.log('Note created successfully:', resData);
+                // Optionally reset the form or redirect the user
+                form.reset();
+            } else {
+                const errorData = await response.json();
+                console.error('Error creating note:', errorData);
+            }
+        }).catch((error) => {
+            console.error('Error creating note:', error);
+        });
     };
 
 

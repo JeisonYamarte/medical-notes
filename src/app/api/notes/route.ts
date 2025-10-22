@@ -3,9 +3,22 @@ import { connectDB } from "@/lib/mongodb";
 import { validateRequest } from "@/lib/validateRequest";
 import Note from "@/model/note";
 import { noteSchema, NoteType } from '@/lib/schemas/noteSchema';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'Unauthorized',
+                },
+                { status: 401 }
+            );
+        }
+
         await connectDB();
         const { data, error } = await validateRequest<NoteType>(request, noteSchema);
 
@@ -14,11 +27,16 @@ export async function POST(request: NextRequest) {
         }
 
         const newNote = new Note({
+            ...data,
+            userId: session.user.id,
+        });
+
+        await newNote.save();
 
         return NextResponse.json(
             {
                 success: true,
-                data: {/* your response data here */}
+                data: newNote
             },
             { status: 200 }
         );
