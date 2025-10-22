@@ -53,11 +53,9 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async jwt({ token, user, account }) {
             if (user) {
-            // para CredentialsProvider
             token.id = user.id;
             }
 
-            // si el proveedor es Google y no hay id todavía
             if (account?.provider === "google" && !token.id) {
             await connectDB();
             const dbUser = await User.findOne({ email: token.email });
