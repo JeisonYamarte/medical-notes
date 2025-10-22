@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -34,110 +34,38 @@ import {
 } from "@/components/ui/pagination"
 import { Search, PlusCircle, Calendar as CalendarIcon, ArrowUpNarrowWide } from "lucide-react";
 
-enum NoteStatus {
-    Stable = "Estable",
-    Critical = "Critico",
-    Pending = "Pendiente",
-}
+import { UrgencyLevelEnum } from "@/lib/schemas/noteSchema";
 
-const notesExample = [
-    {
-        id: 1,
-        patient: "Juan Perez",
-        title: "Nota de seguimiento",
-        date: "2023-10-01",
-        autor: "Dra. Gomez",
-        status: NoteStatus.Stable,
-    },
-    {
-        id: 2,
-        patient: "Maria Lopez",
-        title: "Nota de emergencia",
-        date: "2023-10-02",
-        autor: "Dr. Martinez",
-        status: NoteStatus.Critical,
-    },
-    {
-        id: 3,
-        patient: "Carlos Sanchez",
-        title: "Nota de consulta",
-        date: "2023-10-03",
-        autor: "Dra. Rodriguez",
-        status: NoteStatus.Pending,
-    },
-    { id: 4,
-        patient: "Ana Torres",
-        title: "Nota de seguimiento",
-        date: "2023-10-04",
-        autor: "Dr. Fernandez",
-        status: NoteStatus.Stable,
-    },
-    {
-        id: 5,
-        patient: "Luis Ramirez",
-        title: "Nota de emergencia",
-        date: "2023-10-05",
-        autor: "Dra. Garcia",
-        status: NoteStatus.Critical,
-    },
-    {
-        id: 6,
-        patient: "Sofia Morales",
-        title: "Nota de consulta",
-        date: "2023-10-06",
-        autor: "Dr. Lopez",
-        status: NoteStatus.Pending,
-    },
-    {
-        id: 7,
-        patient: "Diego Flores",
-        title: "Nota de seguimiento",
-        date: "2023-10-07",
-        autor: "Dra. Hernandez",
-        status: NoteStatus.Stable,
-    },
-    { 
-        id: 8,
-        patient: "Elena Ruiz",
-        title: "Nota de emergencia",
-        date: "2023-10-08",
-        autor: "Dr. Martinez",
-        status: NoteStatus.Critical,
-    },
-    { 
-        id: 9,
-        patient: "Javier Gomez",
-        title: "Nota de consulta",
-        date: "2023-10-09",
-        autor: "Dra. Sanchez",
-        status: NoteStatus.Pending,
-    },
-    {
-        id: 10,
-        patient: "Isabella Diaz",
-        title: "Nota de seguimiento",
-        date: "2023-10-10",
-        autor: "Dr. Torres",
-        status: NoteStatus.Stable,
-    }
-]
+import { INote } from "@/model/note";
+
 
 export default function NotesPage() {
+    const [notesToView, setNotesToView] = useState<Array<INote>>([]);
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [open, setOpen] = useState(false);
     const [orderDate, setOrderDate] = useState<"Ascendente" | "Descendente">("Ascendente");
 
-    const stateStyleHandler = (status: NoteStatus) => {
+    const stateStyleHandler = (status: UrgencyLevelEnum) => {
         switch (status) {
-            case NoteStatus.Critical:
+            case UrgencyLevelEnum.HIGH:
                 return "text-red-600  bg-red-100 border-red-300";
-            case NoteStatus.Pending:
+            case UrgencyLevelEnum.MEDIUM:
                 return "text-yellow-600  bg-yellow-100 border-yellow-300";
             default:
                 return "text-green-600  bg-green-100 border-green-300";
         }
     }
     
+    useEffect(() => {
+        fetch('/api/notes')
+            .then(res => res.json())
+            .then(data => {
+                setNotesToView(data.data);
+            })
+            .catch(err => {
+                console.error('Error fetching notes:', err);
+            });
+    }, [])
 
     return (
         <div className="p-4 bg-gray-100 min-h-screen w-full rounded-xl gap-5 flex flex-col border-2 border-gray-200">
@@ -201,20 +129,20 @@ export default function NotesPage() {
                 <TableHeader>
                     <TableRow className="">
                         <TableHead>PACIENTE</TableHead>
-                        <TableHead>TITULO DE LA NOTA</TableHead>
+                        <TableHead>TITULO DE LA NOTA</TableHead>                            
                         <TableHead>FECHA DE CREACION</TableHead>
-                        <TableHead>AUTOR</TableHead>
-                        <TableHead>ESTADO</TableHead>
+                        <TableHead>TIPO</TableHead>
+                        <TableHead>URGENCIA</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {notesExample.map((note) => (
+                    {notesToView.map((note) => (
                         <TableRow className=" h-10 text-lg" key={note.id}>
                             <TableCell className="font-medium">{note.patient}</TableCell>
                             <TableCell className="text-blue-500">{note.title}</TableCell>
-                            <TableCell>{note.date}</TableCell>
-                            <TableCell>{note.autor}</TableCell>
-                            <TableCell><span className={`${stateStyleHandler(note.status)} font-semibold rounded-full text-center p-1 px-3 border-2`}>{note.status}</span></TableCell>
+                            <TableCell>{new Date(note.createdAt).toLocaleDateString()}</TableCell>
+                            <TableCell>{note.noteType}</TableCell>
+                            <TableCell><span className={`${stateStyleHandler(note.urgencyLevel)} font-semibold rounded-full text-center p-1 px-3 border-2`}>{note.urgencyLevel}</span></TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
