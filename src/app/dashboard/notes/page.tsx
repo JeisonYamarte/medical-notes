@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -35,11 +35,29 @@ import {
 import { Search, PlusCircle, Calendar as CalendarIcon, ArrowUpNarrowWide } from "lucide-react";
 
 import { UrgencyLevelEnum } from "@/lib/schemas/noteSchema";
-
 import { INote } from "@/model/note";
 
+const initialState = { 
+    date: null,
+    title: null,
+    urgency: null
+}
+
+function reducer(state: typeof initialState, action: any) {
+    switch (action.type) {
+        case 'SET_TITLE':
+            return { ...state, title: action.payload };
+        case 'SET_URGENCY':
+            return { ...state, urgency: action.payload };
+        default:
+            return state;
+    }
+}
 
 export default function NotesPage() {
+    //state for find in DB
+    const [state, dispatch] = useReducer(reducer, initialState);
+
     const [notesToView, setNotesToView] = useState<Array<INote>>([]);
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [open, setOpen] = useState(false);
@@ -57,15 +75,29 @@ export default function NotesPage() {
     }
     
     useEffect(() => {
-        fetch('/api/notes')
+
+        let query = '/api/notes?';
+
+        if (state.title) {
+            query += `title=${encodeURIComponent(state.title)}&`;
+        }
+        if (state.urgency && state.urgency !== 'all') {
+            query += `urgency=${encodeURIComponent(state.urgency)}&`;
+        }
+        if (date) {
+            query += `date=${encodeURIComponent(date.toISOString())}&`;
+        }
+
+        fetch(query)
             .then(res => res.json())
             .then(data => {
                 setNotesToView(data.data);
+                console.log('Fetched notes on mount:', data.data);
             })
             .catch(err => {
                 console.error('Error fetching notes:', err);
             });
-    }, [])
+    }, [state.title, state.urgency, date]);
 
     return (
         <div className="p-4 bg-gray-100 min-h-screen w-full rounded-xl gap-5 flex flex-col border-2 border-gray-200">
@@ -82,17 +114,18 @@ export default function NotesPage() {
                     <Input
                     className="pl-10 pr-3 py-2 w-full bg-white"
                     placeholder="buscar por titulo"
+                    onChange={(e) => dispatch({ type: 'SET_TITLE', payload: e.target.value })}
                 />
                 </div>
-                <Select>
+                <Select onValueChange={(value) => dispatch({ type: 'SET_URGENCY', payload: value })}>
                     <SelectTrigger className="w-full h-10 bg-white">
-                        <SelectValue placeholder="Filtrar por estado" />
+                        <SelectValue placeholder="Filtrar por urgencia" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent >
                         <SelectItem value="all">Todas</SelectItem>
-                        <SelectItem value="stable">Estable</SelectItem>
-                        <SelectItem value="critical">Critico</SelectItem>
-                        <SelectItem value="pending">Pendiente</SelectItem>
+                        <SelectItem value={UrgencyLevelEnum.LOW}>{UrgencyLevelEnum.LOW}</SelectItem>
+                        <SelectItem value={UrgencyLevelEnum.MEDIUM}>{UrgencyLevelEnum.MEDIUM}</SelectItem>
+                        <SelectItem value={UrgencyLevelEnum.HIGH}>{UrgencyLevelEnum.HIGH}</SelectItem>
                     </SelectContent>
                 </Select>
                 <div className="flex gap-4">
@@ -136,8 +169,8 @@ export default function NotesPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {notesToView.map((note) => (
-                        <TableRow className=" h-10 text-lg" key={note.id}>
+                    {notesToView.map((note, index) => (
+                        <TableRow className=" h-10 text-lg" key={note._id?.toString() || `note-${index}`}>
                             <TableCell className="font-medium">{note.patient}</TableCell>
                             <TableCell className="text-blue-500">{note.title}</TableCell>
                             <TableCell>{new Date(note.createdAt).toLocaleDateString()}</TableCell>

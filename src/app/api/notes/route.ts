@@ -54,7 +54,13 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-    try{
+    try {
+        const searchRequest = request.nextUrl.searchParams;
+
+        const dateParam = searchRequest.get('date') || null;
+        const titleParam = searchRequest.get('title') || null;
+        const urgencyParam = searchRequest.get('urgency') || null;
+
         const session = await getServerSession(authOptions);
         if (!session) {
             return NextResponse.json(
@@ -67,7 +73,12 @@ export async function GET(request: NextRequest) {
         }
 
         await connectDB();
-        const notes  = await Note.find({ userId: session.user.id }).sort({ date: -1 });
+        const notes  = await Note.find({ 
+            userId: session.user.id,
+            ...(dateParam ? { createdAt: { $eq: new Date(dateParam) } } : {}),
+            ...(titleParam ? { title: { $regex: titleParam, $options: 'i' } } : {}),
+            ...(urgencyParam ? { urgencyLevel: urgencyParam } : {}),
+        }).sort({ createdAt: -1 });
 
         if (!notes) {
             return NextResponse.json(
