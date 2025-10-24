@@ -61,7 +61,7 @@ export default function NotesPage() {
     const [notesToView, setNotesToView] = useState<Array<INote>>([]);
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [open, setOpen] = useState(false);
-    const [orderDate, setOrderDate] = useState<"Ascendente" | "Descendente">("Ascendente");
+    const [orderDate, setOrderDate] = useState<"Ascendente" | "Descendente">("Descendente");
 
     const stateStyleHandler = (status: UrgencyLevelEnum) => {
         switch (status) {
@@ -154,6 +154,7 @@ export default function NotesPage() {
                     </Popover>
                     <Button onClick={() => {
                         setOrderDate(orderDate === "Ascendente" ? "Descendente" : "Ascendente")
+                        setNotesToView(notesToView.reverse());
                     }} variant={'outline'} className="w-80 h-10 gap-4 font-semibold items-center justify-start text-lg"><ArrowUpNarrowWide className="scale-120"/>Ordenar por fecha: {orderDate}</Button>
                 </div>
             </div>
@@ -169,7 +170,8 @@ export default function NotesPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {notesToView?.map((note, index) => (
+                    {
+                    notesToView?.map((note, index) => (
                         <TableRow className=" h-10 text-lg" key={note._id?.toString() || `note-${index}`}>
                             <TableCell className="font-medium">{note.patient}</TableCell>
                             <TableCell className="text-blue-500">{note.title}</TableCell>
