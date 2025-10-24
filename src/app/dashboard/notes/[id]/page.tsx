@@ -1,5 +1,5 @@
 "use client"
-import React, { useCallback} from 'react'
+import React, { useCallback, use} from 'react'
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {useDropzone} from 'react-dropzone'
@@ -22,16 +22,44 @@ import { noteSchema, NoteTypeEnum, UrgencyLevelEnum, NoteType} from '@/lib/schem
 
 
 
+type Params = Promise<{ id: string }>
 
-export default function NewNotePage() {
+export default function NewNotePage(props: { params: Params }) {
+    const { id } = use(props.params); 
+    console.log('id: ', id );
+    
+    let noteIdHandler: NoteType ={
+        title: "",
+        content: "",
+        patient: "",
+        noteType: NoteTypeEnum.FOLLOWUP,
+        urgencyLevel: UrgencyLevelEnum.MEDIUM,
+        //tags: [],
+    }
+
+    if (id !== 'new') {
+        fetch(`/api/notes/${id}`)
+        .then(async (response) => {
+            if (response.ok) {
+                const resData = await response.json();
+                console.log('Note fetched successfully:', resData);
+                noteIdHandler = resData;
+            } else {
+                const errorData = await response.json();
+                console.error('Error fetching note:', errorData);
+            }
+        }).catch((error) => {
+            console.error('Error fetching note:', error);
+        });
+    }
     const form = useForm<NoteType>({
         resolver: zodResolver(noteSchema),
         defaultValues: {
-            title: "",
-            content: "",
-            patient: "",
-            noteType: NoteTypeEnum.FOLLOWUP,
-            urgencyLevel: UrgencyLevelEnum.MEDIUM,
+            title: noteIdHandler.title,
+            content: noteIdHandler.content,
+            patient: noteIdHandler.patient,
+            noteType: noteIdHandler.noteType,
+            urgencyLevel: noteIdHandler.urgencyLevel,
             //tags: [],
         },
     });

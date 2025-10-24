@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useReducer } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -38,7 +39,6 @@ import { UrgencyLevelEnum } from "@/lib/schemas/noteSchema";
 import { INote } from "@/model/note";
 
 const initialState = { 
-    date: null,
     title: null,
     urgency: null
 }
@@ -62,6 +62,8 @@ export default function NotesPage() {
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [open, setOpen] = useState(false);
     const [orderDate, setOrderDate] = useState<"Ascendente" | "Descendente">("Descendente");
+
+    const router = useRouter();
 
     const stateStyleHandler = (status: UrgencyLevelEnum) => {
         switch (status) {
@@ -105,7 +107,7 @@ export default function NotesPage() {
                 <h2 className="text-xl font-bold mb-4">Note List</h2>
                 <div className="relative">
                     <PlusCircle className="absolute scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light text-white" />
-                    <Button className="bg-blue-500 pl-10 pr-3 py-2">Crear nueva nota</Button>
+                    <Button onClick={() => router.push('/dashboard/notes/new')} className="bg-blue-500 pl-10 pr-3 py-2">Crear nueva nota</Button>
                 </div>
             </div>
             <div className="flex flex-col gap-4">
