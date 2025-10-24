@@ -61,6 +61,17 @@ export async function GET(request: NextRequest) {
         const titleParam = searchRequest.get('title') || null;
         const urgencyParam = searchRequest.get('urgency') || null;
 
+        console.log('dateParam: ', dateParam);
+        let start;
+        let end;
+        if (dateParam) {
+            const date = new Date(dateParam);
+            start = new Date(date.setHours(0, 0, 0, 0));
+            end = new Date(date.setHours(23, 59, 59, 999));
+            console.log('start: ', start);
+            console.log('end: ', end);
+        }
+        
         const session = await getServerSession(authOptions);
         if (!session) {
             return NextResponse.json(
@@ -75,7 +86,7 @@ export async function GET(request: NextRequest) {
         await connectDB();
         const notes  = await Note.find({ 
             userId: session.user.id,
-            ...(dateParam ? { createdAt: { $eq: new Date(dateParam) } } : {}),
+            ...(dateParam ? { createdAt: { $gte: start, $lte: end } } : {}),
             ...(titleParam ? { title: { $regex: titleParam, $options: 'i' } } : {}),
             ...(urgencyParam ? { urgencyLevel: urgencyParam } : {}),
         }).sort({ createdAt: -1 });

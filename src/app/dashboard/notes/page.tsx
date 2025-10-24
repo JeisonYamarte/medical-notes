@@ -169,7 +169,7 @@ export default function NotesPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {notesToView.map((note, index) => (
+                    {notesToView?.map((note, index) => (
                         <TableRow className=" h-10 text-lg" key={note._id?.toString() || `note-${index}`}>
                             <TableCell className="font-medium">{note.patient}</TableCell>
                             <TableCell className="text-blue-500">{note.title}</TableCell>
