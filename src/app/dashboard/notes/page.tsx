@@ -174,7 +174,7 @@ export default function NotesPage() {
                 <TableBody>
                     {
                     notesToView?.map((note, index) => (
-                        <TableRow className=" h-10 text-lg" key={note._id?.toString() || `note-${index}`}>
+                        <TableRow className=" h-10 text-lg cursor-pointer " key={note._id?.toString() || `note-${index}`} onClick={ () => router.push(`/dashboard/notes/${note._id}`)}>
                             <TableCell className="font-medium">{note.patient}</TableCell>
                             <TableCell className="text-blue-500">{note.title}</TableCell>
                             <TableCell>{new Date(note.createdAt).toLocaleDateString()}</TableCell>

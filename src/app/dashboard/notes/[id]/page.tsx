@@ -26,7 +26,9 @@ type Params = Promise<{ id: string }>
 
 export default function NewNotePage(props: { params: Params }) {
     const { id } = React.use(props.params);
-    console.log('id: ', id );
+
+    const titlePage = id === 'new' ? 'Crear nueva nota' : 'Editar nota';
+
     
     const form = useForm<NoteType>({
         resolver: zodResolver(noteSchema),
@@ -92,7 +94,7 @@ export default function NewNotePage(props: { params: Params }) {
 
     return (
         <div>
-            <h2 className="text-xl font-bold mb-4">Crear nueva nota</h2>
+            <h2 className="text-xl font-bold mb-4">{titlePage}</h2>
             <div className="flex gap-5">
                 <div className="w-2/3">
                     <Form {...form}>
