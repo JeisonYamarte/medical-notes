@@ -1,5 +1,5 @@
 "use client"
-import React, { useCallback, use} from 'react'
+import React, { useCallback, useEffect} from 'react'
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {useDropzone} from 'react-dropzone'
@@ -25,44 +25,41 @@ import { noteSchema, NoteTypeEnum, UrgencyLevelEnum, NoteType} from '@/lib/schem
 type Params = Promise<{ id: string }>
 
 export default function NewNotePage(props: { params: Params }) {
-    const { id } = use(props.params); 
+    const { id } = React.use(props.params);
     console.log('id: ', id );
     
-    let noteIdHandler: NoteType ={
-        title: "",
-        content: "",
-        patient: "",
-        noteType: NoteTypeEnum.FOLLOWUP,
-        urgencyLevel: UrgencyLevelEnum.MEDIUM,
-        //tags: [],
-    }
-
-    if (id !== 'new') {
-        fetch(`/api/notes/${id}`)
-        .then(async (response) => {
-            if (response.ok) {
-                const resData = await response.json();
-                console.log('Note fetched successfully:', resData);
-                noteIdHandler = resData;
-            } else {
-                const errorData = await response.json();
-                console.error('Error fetching note:', errorData);
-            }
-        }).catch((error) => {
-            console.error('Error fetching note:', error);
-        });
-    }
     const form = useForm<NoteType>({
         resolver: zodResolver(noteSchema),
         defaultValues: {
-            title: noteIdHandler.title,
-            content: noteIdHandler.content,
-            patient: noteIdHandler.patient,
-            noteType: noteIdHandler.noteType,
-            urgencyLevel: noteIdHandler.urgencyLevel,
+            title: '',
+            content: '',
+            patient: '',
+            noteType: NoteTypeEnum.FOLLOWUP,
+            urgencyLevel: UrgencyLevelEnum.MEDIUM,
             //tags: [],
         },
     });
+
+    useEffect(() => {
+        if (id !== 'new') {
+        fetch(`/api/notes/${id}`)
+            .then(async (response) => {
+                if (response.ok) {
+                    const resData = await response.json();
+                    console.log('Note fetched successfully:', resData);
+                    form.reset(resData);
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error fetching note:', errorData);
+                }
+            }).catch((error) => {
+                console.error('Error fetching note:', error);
+            });
+        }
+    }, []);
+
+    
+    
 
     const onSubmit = (data: NoteType) => {
         console.log('form:',data);
@@ -149,9 +146,9 @@ export default function NewNotePage(props: { params: Params }) {
                                         <FormItem>
                                             <FormLabel>Tipo de nota</FormLabel>
                                                 <FormControl>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <Select onValueChange={field.onChange} defaultValue={form.getValues("noteType")} value={field.value}>
                                                             <SelectTrigger className="w-full h-10 bg-white">
-                                                                <SelectValue placeholder="selecciona el tipo de nota" />
+                                                                <SelectValue />
                                                             </SelectTrigger>
                                                             <SelectContent>
                                                                 <SelectItem value={NoteTypeEnum.FOLLOWUP}>{NoteTypeEnum.FOLLOWUP}</SelectItem>
@@ -171,9 +168,9 @@ export default function NewNotePage(props: { params: Params }) {
                                         <FormItem>
                                             <FormLabel>Nivel de urgencia</FormLabel>
                                                 <FormControl>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                                             <SelectTrigger className="w-full h-10 bg-white">
-                                                                <SelectValue placeholder="selecciona el nivel de urgencia" />
+                                                                <SelectValue />
                                                             </SelectTrigger>
                                                             <SelectContent>
                                                                 <SelectItem value={UrgencyLevelEnum.LOW}>{UrgencyLevelEnum.LOW}</SelectItem>
