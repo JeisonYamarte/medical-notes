@@ -5,24 +5,13 @@ import { useRouter } from "next/navigation"
 
 import { CardLandingPage } from "@/components/cardLandingPage";
 import { Button } from "@/components/ui/button"
-import { useEffect } from "react";
+
 
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
   const router = useRouter();
-
-  useEffect(() => {
-    fetch('/api/users')
-      .then(response => response.json())
-      .then(data => {
-        console.log('Usuarios:', data);
-      })
-      .catch(error => {
-        console.error('Error al obtener usuarios:', error);
-      });
-  }, []);
 
   return (
     <main className={`flex min-h-screen flex-col items-center justify-between mx-auto  ${inter.className}`}>

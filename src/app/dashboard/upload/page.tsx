@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 
 import { CardListPDF } from '@/components/cardListPDF'
 import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
-import App from 'next/app'
+
 
 
 export default function UploadPage() {
@@ -16,20 +16,42 @@ export default function UploadPage() {
         setFiles((prev) => [...prev, ...acceptedFiles])
         console.log(acceptedFiles)
     }, [])
-    const {getRootProps, getInputProps, isDragActive, acceptedFiles} = useDropzone({onDrop})
+    const {
+        getRootProps, 
+        getInputProps, 
+        isDragActive, 
+        acceptedFiles,
+        fileRejections,
+    } = useDropzone({
+        accept: {
+            'application/pdf': ['.pdf'],
+        },
+        onDrop
+    })
 
     return (
         <div className='min-h-screen flex gap-10'>
             <main className='w-2/3'>
                 <h2 className="text-xl font-bold mb-4">Cargar documentos PDF</h2>
-                <div className='flex flex-col items-start w-full min-h-max border-2 border-gray-300  rounded-lg bg-gray-50 cursor-pointer p-10 gap-5'>
-                    <div className='flex flex-col justify-center border-3 border-dashed border-gray-300 rounded-lg text-center items-center w-full h-[300px] ' {...getRootProps()}>
+                <div className='flex flex-col items-start w-full min-h-max border-2 border-gray-300  rounded-lg bg-gray-50 p-10 gap-5'>
+                    <div className='flex flex-col justify-center border-3 border-dashed border-gray-300 rounded-lg text-center items-center w-full h-[300px] cursor-pointer' {...getRootProps()}>
                         <input {...getInputProps()} />
                         <CloudUpload className='mx-auto my-4' size={48} />
-                        {
+                        { 
                             isDragActive ?
                             <p>Drop the files here ...</p> :
                             <p>Drag 'n' drop some files here, or click to select files</p>
+                        }
+                        {
+                            fileRejections.length > 0 && (
+                                <div className="text-red-500 mt-2">
+                                    {fileRejections.map(({ file }) => (
+                                        <div key={file.name}>
+                                            <p>File "{file.name}" was rejected: only PDF files are allowed.</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )
                         }
                     </div>
                     <div className='w-full '>

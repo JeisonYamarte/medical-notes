@@ -90,7 +90,17 @@ export default function NewNotePage(props: { params: Params }) {
     const onDrop = useCallback((acceptedFiles: File[]) => {
         // Do something with the files
     }, [])
-    const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
+    const {
+        getRootProps,
+        getInputProps,
+        fileRejections,
+        isDragActive
+    } = useDropzone({
+        accept: {
+            'application/pdf': ['.pdf'],
+        },
+        onDrop
+    })
 
     return (
         <div>
@@ -213,6 +223,15 @@ export default function NewNotePage(props: { params: Params }) {
                             <p>Drop the files here ...</p> :
                             <p>Drag 'n' drop some files here, or click to select files</p>
                         }
+                        {fileRejections.length > 0 && (
+                            <div className="text-red-500 mt-2">
+                                {fileRejections.map(({ file }) => (
+                                    <div key={file.name}>
+                                        <p>File "{file.name}" was rejected: only PDF files are allowed.</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
