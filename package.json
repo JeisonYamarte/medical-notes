@@ -25,6 +25,7 @@
     "bcryptjs": "^3.0.2",
     "chromadb": "^3.0.17",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.544.0",
@@ -39,6 +40,7 @@
     "react-hook-form": "^7.63.0",
     "sharp": "^0.34.4",
     "tailwind-merge": "^3.3.1",
+    "unpdf": "^1.4.0",
     "zod": "^4.1.11"
   },
   "devDependencies": {

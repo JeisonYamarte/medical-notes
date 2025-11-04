@@ -12,10 +12,7 @@ import { CardPdfResume } from "@/components/cardPdfResume";
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);
-    console.log('session:', session);
-    const collection = await getCollection('medical-notes');
-    console.log('ChromaDB Collection:', collection);
-    
+
     return (
         <div className="p-4 bg-gray-100 min-h-screen w-full rounded-xl">
             <div>

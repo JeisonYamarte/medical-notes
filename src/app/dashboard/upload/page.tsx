@@ -7,15 +7,25 @@ import { Button } from '@/components/ui/button'
 
 import { CardListPDF } from '@/components/cardListPDF'
 import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
+import { uploadPDF } from '@/lib/pdfActions'
 
 
 
 export default function UploadPage() {
     const [files, setFiles] = React.useState<File[]>([{} as File])
+
     const onDrop = useCallback((acceptedFiles: File[]) => {
         setFiles((prev) => [...prev, ...acceptedFiles])
         console.log(acceptedFiles)
     }, [])
+
+    const handlePdf = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        const formData = new FormData();
+        const blob = new Blob(files, { type: 'application/pdf' });
+        formData.append('file', blob);
+        uploadPDF(formData);
+    }
     const {
         getRootProps, 
         getInputProps, 
@@ -63,7 +73,7 @@ export default function UploadPage() {
                         </ul>
                     </div>
                     <div className='w-full flex justify-end'>
-                        <Button className='bg-blue-500' disabled={acceptedFiles.length === 0}>Subir archivos</Button>
+                        <Button onClick={(e) => handlePdf(e)} className='bg-blue-500' disabled={acceptedFiles.length === 0}>Subir archivos</Button>
                     </div>
                 </div>
             </main>
