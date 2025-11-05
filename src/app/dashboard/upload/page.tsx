@@ -1,31 +1,59 @@
 "use client"
-import React, { useCallback} from 'react'
+import React, { useCallback, useState } from 'react'
 import {useDropzone} from 'react-dropzone'
 import { CloudUpload } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
+import type { PdfUploadType } from '@/lib/schemas/pdfSchema'
+import { PdfMimeTypeEnum } from '@/lib/schemas/pdfSchema'
 import { CardListPDF } from '@/components/cardListPDF'
 import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
-import { uploadPDF } from '@/lib/pdfActions'
+import { uploadPDF, savePdfMetadata } from '@/lib/pdfService'
 
 
 
 export default function UploadPage() {
-    const [files, setFiles] = React.useState<File[]>([{} as File])
+    const [files, setFiles] = useState<File[]>([])
+    const [isUploading, setIsUploading] = useState(false)
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
-        setFiles((prev) => [...prev, ...acceptedFiles])
+        setFiles(acceptedFiles)
         console.log(acceptedFiles)
     }, [])
 
     const handlePdf = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        setIsUploading(true);
+        
         const formData = new FormData();
-        const blob = new Blob(files, { type: 'application/pdf' });
-        formData.append('file', blob);
-        uploadPDF(formData);
+        formData.append('file', files[0]); // Pasa el File directamente, no un Blob
+        
+        uploadPDF(formData)
+            .then((result) => {
+                if (result.status === 200 && result.url) {
+                    const pdfData: PdfUploadType = {
+                        fileName: files[0].name,
+                        originalName: files[0].name,
+                        fileUrl: result.url, // Usa la URL retornada
+                        fileSize: files[0].size,
+                    }
+                    
+                    return savePdfMetadata(pdfData);
+                }
+            })
+            .then(() => {
+                console.log('PDF uploaded and saved successfully');
+                setFiles([]); // Limpia los archivos
+            })
+            .catch((error) => {
+                console.error('Error uploading PDF:', error);
+            })
+            .finally(() => {
+                setIsUploading(false);
+            });
     }
+
     const {
         getRootProps, 
         getInputProps, 
@@ -73,7 +101,13 @@ export default function UploadPage() {
                         </ul>
                     </div>
                     <div className='w-full flex justify-end'>
-                        <Button onClick={(e) => handlePdf(e)} className='bg-blue-500' disabled={acceptedFiles.length === 0}>Subir archivos</Button>
+                        <Button 
+                            onClick={(e) => handlePdf(e)} 
+                            className='bg-blue-500' 
+                            disabled={acceptedFiles.length === 0 || isUploading}
+                        >
+                            {isUploading ? 'Subiendo...' : 'Subir archivos'}
+                        </Button>
                     </div>
                 </div>
             </main>

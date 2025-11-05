@@ -40,6 +40,10 @@ const userSchema = new Schema<IUser>({
     timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' }
 })
 
+// Índices para mejorar el rendimiento de las consultas
+userSchema.index({ createdAt: -1 }); // Ordenar usuarios por fecha de registro
+userSchema.index({ name: 1 }); // Búsqueda por nombre
+
 userSchema.pre<IUser>('save', function (next) {
     if (!this.isModified('password')) return next();
     bcrypt.hash(this.password, 10, (err, hash) => {

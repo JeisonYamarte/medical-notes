@@ -56,6 +56,13 @@ const noteSchema = new Schema<INote>(
     }
 )
 
+// Índices para mejorar el rendimiento de las consultas
+noteSchema.index({ userId: 1 }); // Buscar notas por usuario
+noteSchema.index({ createdAt: -1 }); // Ordenar por fecha (más recientes primero)
+noteSchema.index({ noteType: 1 }); // Filtrar por tipo de nota
+noteSchema.index({ urgencyLevel: 1 }); // Filtrar por nivel de urgencia
+noteSchema.index({ userId: 1, createdAt: -1 }); // Notas de usuario ordenadas por fech
+
 export const Note: Model<INote> = (models.Note as Model<INote>) || model<INote>('Note', noteSchema);
 
 export default Note;
