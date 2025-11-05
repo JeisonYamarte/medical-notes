@@ -58,5 +58,28 @@ export async function savePdfMetadata(data: PdfUploadType) {
 
     await newPdf.save();
 
-    return newPdf;
+    console.log('PDF metadata saved successfully');
+}
+
+export async function getPdfList() {
+
+    console.log('entro a la funcion');
+    
+    const session = await getServerSession(authOptions);
+    if (!session) {
+        throw new Error('Unauthorized');
+    }
+
+    await connectDB();
+
+    const pdfList = await Pdf.find({ uploadedBy: session.user.id }, { __v: 0, uploadedBy: 0, _id: 0 })
+    console.log('Fetched PDF list:', pdfList);
+    const formattedList = pdfList.map(pdf => ({
+        fileName: pdf.fileName,
+        originalName: pdf.originalName,
+        fileUrl: pdf.fileUrl,
+        fileSize: pdf.fileSize,
+    }));
+    console.log('Formatted PDF list:', formattedList);
+    return formattedList;
 }

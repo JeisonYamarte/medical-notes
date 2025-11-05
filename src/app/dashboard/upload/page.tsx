@@ -1,36 +1,46 @@
 "use client"
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import {useDropzone} from 'react-dropzone'
 import { CloudUpload } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
 import type { PdfUploadType } from '@/lib/schemas/pdfSchema'
-import { PdfMimeTypeEnum } from '@/lib/schemas/pdfSchema'
 import { CardListPDF } from '@/components/cardListPDF'
 import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
-import { uploadPDF, savePdfMetadata } from '@/lib/pdfService'
+import { uploadPDF, savePdfMetadata, getPdfList } from '@/lib/pdfService'
 
 
 
 export default function UploadPage() {
     const [files, setFiles] = useState<File[]>([])
     const [isUploading, setIsUploading] = useState(false)
+    const [progressBar, setProgressBar] = useState(0);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         setFiles(acceptedFiles)
         console.log(acceptedFiles)
     }, [])
 
+    useEffect(() => {
+        (async ()=>{
+            const pdflist = await getPdfList();
+            console.log(pdflist);
+        })()
+    }, []);
+
     const handlePdf = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+
         setIsUploading(true);
-        
+        setProgressBar(10);
+
         const formData = new FormData();
-        formData.append('file', files[0]); // Pasa el File directamente, no un Blob
+        formData.append('file', acceptedFiles[0]); 
         
         uploadPDF(formData)
             .then((result) => {
+                setProgressBar(70);
                 if (result.status === 200 && result.url) {
                     const pdfData: PdfUploadType = {
                         fileName: files[0].name,
@@ -50,6 +60,7 @@ export default function UploadPage() {
                 console.error('Error uploading PDF:', error);
             })
             .finally(() => {
+                setProgressBar(100);
                 setIsUploading(false);
             });
     }
@@ -96,7 +107,7 @@ export default function UploadPage() {
                         {acceptedFiles.length > 0 && <h2>Archivos seleccionados</h2>}
                         <ul className='h-100 overflow-y-auto mt-10 '>
                             {acceptedFiles.map((file) => (
-                                <CardListPDF key={file.name} title={file.name} size={file.size} />
+                                <CardListPDF key={file.name} title={file.name} size={file.size} progressBar={progressBar}/>
                             ))}
                         </ul>
                     </div>
