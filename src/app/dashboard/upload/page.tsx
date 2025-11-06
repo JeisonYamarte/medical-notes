@@ -12,20 +12,23 @@ import { uploadPDF, savePdfMetadata, getPdfList } from '@/lib/pdfService'
 
 
 
+
 export default function UploadPage() {
-    const [files, setFiles] = useState<File[]>([])
+    const [files, setFiles] = useState<{ id: string; fileName: string; originalName: string; fileUrl: string; fileSize: number; createdAt: Date; }[]>([])
     const [isUploading, setIsUploading] = useState(false)
+    const [isListLoading, setIsListLoading] = useState(true)
     const [progressBar, setProgressBar] = useState(0);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
-        setFiles(acceptedFiles)
         console.log(acceptedFiles)
     }, [])
 
     useEffect(() => {
         (async ()=>{
+            setIsListLoading(true);
             const pdflist = await getPdfList();
-            console.log(pdflist);
+            setFiles(pdflist);
+            setIsListLoading(false);
         })()
     }, []);
 
@@ -43,10 +46,10 @@ export default function UploadPage() {
                 setProgressBar(70);
                 if (result.status === 200 && result.url) {
                     const pdfData: PdfUploadType = {
-                        fileName: files[0].name,
-                        originalName: files[0].name,
+                        fileName: acceptedFiles[0].name,
+                        originalName: acceptedFiles[0].name,
                         fileUrl: result.url, // Usa la URL retornada
-                        fileSize: files[0].size,
+                        fileSize: acceptedFiles[0].size,
                     }
                     
                     return savePdfMetadata(pdfData);
@@ -125,12 +128,15 @@ export default function UploadPage() {
             <aside className='w-1/3 max-w-sm'>
                 <h2 className="text-xl font-bold mb-4">PDFs subidos</h2>
                 <div className='flex flex-col items-start w-full border-2 border-gray-300  rounded-lg bg-gray-50 cursor-pointer p-3 gap-5 h-[500px] overflow-y-auto'>
-                    {acceptedFiles.length > 0 ? (
-                        acceptedFiles.map((file) => (
-                            <CardPDFsUpload key={file.name} title={file.name} date={file.lastModified ? new Date(file.lastModified).toLocaleDateString() : ''} size={file.size} />
-                        ))
+                    {isListLoading ? (
+                        <p className='text-gray-500'>Cargando lista de PDFs...</p>
                     ) : (
-                        <p className='text-gray-500'>No hay archivos subidos aún.</p>
+                        files.length === 0 ? (
+                            <p className='text-gray-500'>No hay PDFs subidos.</p>
+                        ) :
+                        files.map((file) => (
+                            <CardPDFsUpload key={file.id} title={file.fileName} date={file.createdAt ? new Date(file.createdAt).toLocaleDateString() : ''} size={file.fileSize} />
+                        ))
                     )}
                 </div>
             </aside>

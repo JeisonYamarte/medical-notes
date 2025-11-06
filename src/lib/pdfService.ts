@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 import Pdf  from '@/model/pdf';
 import { connectDB } from "@/lib/mongodb";
+import { create } from 'domain';
 
 
 export async function uploadPDF(file: FormData) {
@@ -72,14 +73,17 @@ export async function getPdfList() {
 
     await connectDB();
 
-    const pdfList = await Pdf.find({ uploadedBy: session.user.id }, { __v: 0, uploadedBy: 0, _id: 0 })
+    const pdfList = await Pdf.find({ uploadedBy: session.user.id }, { __v: 0, uploadedBy: 0})
     console.log('Fetched PDF list:', pdfList);
     const formattedList = pdfList.map(pdf => ({
+        id: pdf.id.toString(),
         fileName: pdf.fileName,
         originalName: pdf.originalName,
         fileUrl: pdf.fileUrl,
         fileSize: pdf.fileSize,
+        createdAt: pdf.createdAt,
     }));
-    console.log('Formatted PDF list:', formattedList);
     return formattedList;
 }
+
+
