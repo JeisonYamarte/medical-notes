@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import type { PdfUploadType } from '@/lib/schemas/pdfSchema'
 import { CardListPDF } from '@/components/cardListPDF'
 import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
-import { uploadPDF, savePdfMetadata, getPdfList } from '@/lib/pdfService'
+import { uploadPDF, savePdfMetadata, getPdfList, saveEmbebingText} from '@/lib/pdfService'
 
 
 
@@ -20,22 +20,22 @@ export default function UploadPage() {
     const [progressBar, setProgressBar] = useState(0);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
-        console.log(acceptedFiles)
+        setProgressBar(0)
     }, [])
 
     useEffect(() => {
         (async ()=>{
-            setIsListLoading(true);
             const pdflist = await getPdfList();
             setFiles(pdflist);
             setIsListLoading(false);
         })()
-    }, []);
+    }, [isListLoading]);
 
     const handlePdf = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
         setIsUploading(true);
+        setIsListLoading(true);
         setProgressBar(10);
 
         const formData = new FormData();
@@ -55,8 +55,11 @@ export default function UploadPage() {
                     return savePdfMetadata(pdfData);
                 }
             })
-            .then(() => {
-                console.log('PDF uploaded and saved successfully');
+            .then((result) => {
+                setProgressBar(90);
+                if(result && result.status === 200 && result.pdfId) {
+                    saveEmbebingText(formData, result.pdfId.toString()); //usa la id retornada de la DB
+                }
                 setFiles([]); // Limpia los archivos
             })
             .catch((error) => {

@@ -6,9 +6,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 import Pdf  from '@/model/pdf';
 import { connectDB } from "@/lib/mongodb";
-import { create } from 'domain';
 
-
+// Uploads a PDF file to Cloudinary and returns the secure URL
 export async function uploadPDF(file: FormData) {
     const pdfFile = file.get('file') as File; 
 
@@ -44,6 +43,7 @@ export async function uploadPDF(file: FormData) {
 
 }
 
+// Saves PDF metadata to the database associated with the current user
 export async function savePdfMetadata(data: PdfUploadType) {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -59,9 +59,32 @@ export async function savePdfMetadata(data: PdfUploadType) {
 
     await newPdf.save();
 
-    console.log('PDF metadata saved successfully');
+    const pdfId = newPdf.id.toString();
+
+    return { status: 200, message: 'Metadata saved successfully', pdfId };
 }
 
+export async function saveEmbebingText(file: FormData, pdfId: string) {
+    const { text } = await extractTextFromPdf(file);
+    if (!text) {
+        return { status: 400, message: 'No text extracted' };
+    }
+    const cleanText = text.join(" ")         // une todo el array en un solo string
+            .replace(/\+/g, " ")            // reemplaza los + por espacios
+            .replace(/\\n|\\r|\n|\r/g, " ") // elimina saltos de línea visibles o reales
+            .replace(/\\?x[0-9A-Fa-f]{2}/g, " ") // quita secuencias tipo x86, x20, etc.
+            .replace(/\u0083/g, " ")      // elimina caracteres Unicode no deseados
+            .replace(/\s+/g, " ")           // reduce múltiples espacios a uno solo
+            .trim();                        // elimina espacios del inicio y final
+
+            
+        const chunks = splitTextByWords(cleanText);
+
+        console.log('Text Chunks:', chunks);
+}
+
+
+// Retrieves the list of PDFs uploaded by the current authenticated user
 export async function getPdfList() {
 
     console.log('entro a la funcion');
@@ -73,8 +96,8 @@ export async function getPdfList() {
 
     await connectDB();
 
-    const pdfList = await Pdf.find({ uploadedBy: session.user.id }, { __v: 0, uploadedBy: 0})
-    console.log('Fetched PDF list:', pdfList);
+    const pdfList = await Pdf.find({ uploadedBy: session.user.id }, { __v: 0, uploadedBy: 0}).sort({ createdAt: -1 });
+
     const formattedList = pdfList.map(pdf => ({
         id: pdf.id.toString(),
         fileName: pdf.fileName,
@@ -83,7 +106,42 @@ export async function getPdfList() {
         fileSize: pdf.fileSize,
         createdAt: pdf.createdAt,
     }));
+
     return formattedList;
 }
 
+// Extracts text content from a PDF file and logs the results
+async function extractTextFromPdf(file: FormData) {
+    const pdfFile = file.get('file') as File; 
+
+    if (!pdfFile) {
+        return { status: 400, message: 'No file uploaded' };
+    }
+
+    const bytes = await pdfFile.arrayBuffer();
+    const buffer = new Uint8Array(bytes);
+
+    const { text } = await extractText(buffer);
+    
+    return { status: 200, message: 'Text extracted successfully', text };
+}
+
+function splitTextByWords(text: string, maxLength = 100) {
+    const words = text.split(" ");
+    const chunks: string[] = [];
+    let currentChunk = "";
+
+    for (const word of words) {
+        if ((currentChunk + word).length > maxLength) {
+        chunks.push(currentChunk.trim());
+        currentChunk = word + " ";
+        } else {
+        currentChunk += word + " ";
+        }
+    }
+
+    if (currentChunk.trim().length > 0) chunks.push(currentChunk.trim());
+
+    return chunks;
+}
 
