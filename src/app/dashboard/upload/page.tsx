@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import type { PdfUploadType } from '@/lib/schemas/pdfSchema'
 import { CardListPDF } from '@/components/cardListPDF'
 import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
-import { uploadPDF, savePdfMetadata, getPdfList, saveEmbebingText} from '@/lib/pdfService'
+import { uploadPDF, savePdfMetadata, getPdfList, saveEmbebingText, extractTextFromPdf} from '@/lib/pdfService'
 
 
 
@@ -58,9 +58,22 @@ export default function UploadPage() {
             .then((result) => {
                 setProgressBar(90);
                 if(result && result.status === 200 && result.pdfId) {
-                    saveEmbebingText(formData, result.pdfId.toString()); //usa la id retornada de la DB
+                    return extractTextFromPdf(formData);
                 }
-                setFiles([]); // Limpia los archivos
+            })
+            .then((extractResult) => {
+                if(extractResult && extractResult.status === 200 && extractResult.text) {
+                    fetch('/api/chroma', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text: extractResult.text }),
+                    });
+                }
+            })
+            .then(() => {
+                setProgressBar(100);
             })
             .catch((error) => {
                 console.error('Error uploading PDF:', error);

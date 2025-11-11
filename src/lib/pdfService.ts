@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 import Pdf  from '@/model/pdf';
 import { connectDB } from "@/lib/mongodb";
+import { getCollection } from '@/model/contextFiles';
 
 // Uploads a PDF file to Cloudinary and returns the secure URL
 export async function uploadPDF(file: FormData) {
@@ -64,11 +65,8 @@ export async function savePdfMetadata(data: PdfUploadType) {
     return { status: 200, message: 'Metadata saved successfully', pdfId };
 }
 
-export async function saveEmbebingText(file: FormData, pdfId: string) {
-    const { text } = await extractTextFromPdf(file);
-    if (!text) {
-        return { status: 400, message: 'No text extracted' };
-    }
+export async function saveEmbebingText(text: string[]) {
+
     const cleanText = text.join(" ")         // une todo el array en un solo string
             .replace(/\+/g, " ")            // reemplaza los + por espacios
             .replace(/\\n|\\r|\n|\r/g, " ") // elimina saltos de línea visibles o reales
@@ -80,14 +78,44 @@ export async function saveEmbebingText(file: FormData, pdfId: string) {
             
         const chunks = splitTextByWords(cleanText);
 
-        console.log('Text Chunks:', chunks);
+        const session = await getServerSession(authOptions);
+
+        if (!session) {
+            throw new Error('Unauthorized');
+        }
+
+        const userId = session.user.id;
+
+        //const ids = chunks.map((chunk, index) => `${userId}_pdfId_${pdfId}_(${index})_${Date.now()}`);
+
+        try {
+            const collection = await getCollection();
+
+            await collection.add({
+                ids: ['id1'],
+                documents: ['la casa de papel blaco'],
+                /*metadatas: chunks.map(() => ({
+                    user_id: userId,
+                    file_id: pdfId,
+                }))*/
+            })
+
+            const count = await collection.count();
+            console.log(`✅ Cantidad de documentos en la colección: ${count}`);
+
+        } catch (error) {
+            console.error('Error saving embeddings:', error);
+        } finally {
+            console.log('Embeddings process completed.');
+        }
+
+        
 }
 
 
 // Retrieves the list of PDFs uploaded by the current authenticated user
 export async function getPdfList() {
 
-    console.log('entro a la funcion');
     
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -111,7 +139,7 @@ export async function getPdfList() {
 }
 
 // Extracts text content from a PDF file and logs the results
-async function extractTextFromPdf(file: FormData) {
+export async function extractTextFromPdf(file: FormData) {
     const pdfFile = file.get('file') as File; 
 
     if (!pdfFile) {

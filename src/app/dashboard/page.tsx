@@ -3,7 +3,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileEdit, Link, Search } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getCollection } from "@/model/contextPdf";
 
 import { CardDashboard } from "@/components/cardDashboard";
 import { CardPdfResume } from "@/components/cardPdfResume";
