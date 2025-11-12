@@ -65,9 +65,13 @@ export async function savePdfMetadata(data: PdfUploadType) {
     return { status: 200, message: 'Metadata saved successfully', pdfId };
 }
 
-export async function saveEmbebingText(text: string[]) {
+export async function saveEmbebingText(FormData: FormData, pdfId: string) {
+    const extractResult = await extractTextFromPdf(FormData);
 
-    const cleanText = text.join(" ")         // une todo el array en un solo string
+    if(extractResult.status !== 200 || !extractResult.text) {
+        throw new Error('Text extraction failed');
+    }
+    const cleanText = extractResult.text.join(" ")         // une todo el array en un solo string
             .replace(/\+/g, " ")            // reemplaza los + por espacios
             .replace(/\\n|\\r|\n|\r/g, " ") // elimina saltos de línea visibles o reales
             .replace(/\\?x[0-9A-Fa-f]{2}/g, " ") // quita secuencias tipo x86, x20, etc.
@@ -86,22 +90,19 @@ export async function saveEmbebingText(text: string[]) {
 
         const userId = session.user.id;
 
-        //const ids = chunks.map((chunk, index) => `${userId}_pdfId_${pdfId}_(${index})_${Date.now()}`);
+        const ids = chunks.map((chunk, index) => `${userId}_pdfId_${pdfId}_(${index})_${Date.now()}`);
 
         try {
             const collection = await getCollection();
 
             await collection.add({
-                ids: ['id1'],
-                documents: ['la casa de papel blaco'],
-                /*metadatas: chunks.map(() => ({
+                ids: ids,
+                documents: chunks,
+                metadatas: chunks.map(() => ({
                     user_id: userId,
                     file_id: pdfId,
-                }))*/
+                }))
             })
-
-            const count = await collection.count();
-            console.log(`✅ Cantidad de documentos en la colección: ${count}`);
 
         } catch (error) {
             console.error('Error saving embeddings:', error);
@@ -139,7 +140,7 @@ export async function getPdfList() {
 }
 
 // Extracts text content from a PDF file and logs the results
-export async function extractTextFromPdf(file: FormData) {
+async function extractTextFromPdf(file: FormData) {
     const pdfFile = file.get('file') as File; 
 
     if (!pdfFile) {

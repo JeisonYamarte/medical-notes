@@ -8,14 +8,14 @@ const embedder = new CohereEmbeddingFunction({
 
 export const getCollection = async () => {
   const heartBeat = await chromaDbClient.heartbeat();
-  console.log('ChromaDB Heartbeat:', heartBeat);
   
   if (!heartBeat) {
     throw new Error('ChromaDB is not reachable');
   }
+  
 
   const collection = await chromaDbClient.getOrCreateCollection({
-    name: 'collection_name',
+    name: process.env.COLLECTION_NAME || 'collection_name',
     embeddingFunction: embedder,
   });
   

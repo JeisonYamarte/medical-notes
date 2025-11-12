@@ -8,7 +8,12 @@ import { Button } from '@/components/ui/button'
 import type { PdfUploadType } from '@/lib/schemas/pdfSchema'
 import { CardListPDF } from '@/components/cardListPDF'
 import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
-import { uploadPDF, savePdfMetadata, getPdfList, saveEmbebingText, extractTextFromPdf} from '@/lib/pdfService'
+import { 
+    uploadPDF, 
+    savePdfMetadata, 
+    getPdfList, 
+    saveEmbebingText
+} from '@/lib/pdfService'
 
 
 
@@ -58,18 +63,7 @@ export default function UploadPage() {
             .then((result) => {
                 setProgressBar(90);
                 if(result && result.status === 200 && result.pdfId) {
-                    return extractTextFromPdf(formData);
-                }
-            })
-            .then((extractResult) => {
-                if(extractResult && extractResult.status === 200 && extractResult.text) {
-                    fetch('/api/chroma', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ text: extractResult.text }),
-                    });
+                    return saveEmbebingText(formData, result.pdfId);
                 }
             })
             .then(() => {
