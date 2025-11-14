@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.31",
     "@auth/mongodb-adapter": "^3.11.0",
     "@chroma-core/cohere": "^0.1.7",
     "@hookform/resolvers": "^5.2.2",
@@ -22,6 +23,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "ai": "^5.0.93",
     "bcryptjs": "^3.0.2",
     "chromadb": "^3.0.17",
     "class-variance-authority": "^0.7.1",

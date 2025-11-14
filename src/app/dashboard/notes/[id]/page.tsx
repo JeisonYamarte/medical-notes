@@ -15,9 +15,20 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, 
+    SelectContent, 
+    SelectItem, 
+    SelectTrigger, 
+    SelectValue 
+} from "@/components/ui/select"
 
-import { noteSchema, NoteTypeEnum, UrgencyLevelEnum, NoteType} from '@/lib/schemas/noteSchema';
+import { 
+    noteSchema, 
+    NoteTypeEnum, 
+    UrgencyLevelEnum, 
+    NoteType
+} from '@/lib/schemas/noteSchema';
+import { generatePrediction } from '@/lib/predictIA';
 
 
 
@@ -58,6 +69,12 @@ export default function NewNotePage(props: { params: Params }) {
                 console.error('Error fetching note:', error);
             });
         }
+        const fetchPrediction = async () => {
+            const aggText = await generatePrediction("genera una pequeña oracion que sea sinonimo de estoy funcionando bien");
+            form.setValue("content", aggText);
+            console.log('Prediction:', aggText);
+        }
+        fetchPrediction();
     }, []);
 
     
