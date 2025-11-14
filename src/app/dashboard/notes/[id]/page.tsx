@@ -28,7 +28,10 @@ import {
     UrgencyLevelEnum, 
     NoteType
 } from '@/lib/schemas/noteSchema';
-import { generatePrediction } from '@/lib/predictIA';
+import { 
+    generatePrediction,
+    getContextualPrediction
+ } from '@/lib/predictIA';
 
 
 
@@ -74,7 +77,7 @@ export default function NewNotePage(props: { params: Params }) {
             form.setValue("content", aggText);
             console.log('Prediction:', aggText);
         }
-        fetchPrediction();
+        //fetchPrediction();
     }, []);
 
     
@@ -119,6 +122,13 @@ export default function NewNotePage(props: { params: Params }) {
         onDrop
     })
 
+    const handlerPredict = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const userInput = e.target.value;
+        console.log('target:', e)
+        getContextualPrediction(userInput);
+    }
+
+
     return (
         <div>
             <h2 className="text-xl font-bold mb-4">{titlePage}</h2>
@@ -145,7 +155,11 @@ export default function NewNotePage(props: { params: Params }) {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormControl>
-                                            <Textarea className="resize-none w-full h-[400px]" placeholder="Contenido de la nota" {...field} />
+                                            <Textarea 
+                                            className="resize-none w-full h-[400px]" placeholder="Contenido de la nota" 
+                                            {...field} 
+                                            onChange={(e) => handlerPredict(e)}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
