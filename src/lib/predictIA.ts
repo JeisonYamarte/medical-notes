@@ -4,6 +4,8 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { getCollection } from '@/model/contextFiles';
 import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
+import type { QueryResult } from 'chromadb';
+
 
 const google = createGoogleGenerativeAI({
     apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
@@ -24,11 +26,19 @@ export async function getContextualPrediction(userInput: string = 'como puedo me
     
     const searchResults = await searchChroma(userInput);
 
-    console.log('Search Results:', searchResults);
+    const response = {
+        ids: searchResults.ids,
+        distances: searchResults.distances,
+        documents: searchResults.documents,
+        metadatas: searchResults.metadatas,
+        embeddings: searchResults.embeddings,
+    }
+
+    return response;
 }
 
 // Searches the ChromaDB collection for relevant documents based on the input text
-async function searchChroma(text:string) {
+async function searchChroma(text:string): Promise<QueryResult> {
     let query: string;
     if (text.length >= 100){
         query = text.slice(-100)
@@ -45,11 +55,14 @@ async function searchChroma(text:string) {
 
     const collection =  await getCollection();
 
-    const results = await collection.query({
+    const results: QueryResult = await collection.query({
         queryTexts: [query],
         nResults: 3,
-        
+        where:{
+            'user_id': userId
+        }
     })
+    console.log("type of:", typeof results)
     
     return results;
 }

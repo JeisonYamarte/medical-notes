@@ -125,7 +125,9 @@ export default function NewNotePage(props: { params: Params }) {
     const handlerPredict = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const userInput = e.target.value;
         console.log('target:', e)
-        getContextualPrediction(userInput);
+        getContextualPrediction(userInput).then((result) =>{
+            console.log("log result:", result)
+        })
     }
 
 
