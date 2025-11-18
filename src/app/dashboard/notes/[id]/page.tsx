@@ -31,7 +31,10 @@ import {
 import { 
     generatePrediction,
     getContextualPrediction
- } from '@/lib/predictIA';
+} from '@/lib/predictIA';
+import {
+    NoteState
+} from '@/lib/noteState';
 
 
 
@@ -40,6 +43,11 @@ type Params = Promise<{ id: string }>
 
 export default function NewNotePage(props: { params: Params }) {
     const { id } = React.use(props.params);
+    let debounceTimer: NodeJS.Timeout | null = null;
+
+    const [userInput, setUserInput] = React.useState<string>('');
+
+    const noteState = NoteState.getInstance();
 
     const titlePage = id === 'new' ? 'Crear nueva nota' : 'Editar nota';
 
@@ -55,6 +63,11 @@ export default function NewNotePage(props: { params: Params }) {
             //tags: [],
         },
     });
+
+
+    useEffect(() => {
+        // Call the debounce function whenever userInput changes
+    }, [userInput]);
 
     useEffect(() => {
         if (id !== 'new') {
@@ -122,12 +135,17 @@ export default function NewNotePage(props: { params: Params }) {
         onDrop
     })
 
-    const handlerPredict = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const userInput = e.target.value;
-        console.log('target:', e)
-        getContextualPrediction(userInput).then((result) =>{
-            console.log("log result:", result)
-        })
+
+
+
+    const handlerPredict = async () => {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+        }
+        debounceTimer = setTimeout(() => {
+            console.log('Debounced input:', form.getValues("content"));
+            // Call your function here with the debounced input
+        }, 2000);
     }
 
 
@@ -160,7 +178,11 @@ export default function NewNotePage(props: { params: Params }) {
                                             <Textarea 
                                             className="resize-none w-full h-[400px]" placeholder="Contenido de la nota" 
                                             {...field} 
-                                            onChange={(e) => handlerPredict(e)}
+                                            onChange={(e) => {
+                                                    field.onChange(e); 
+                                                    handlerPredict()
+                                                }
+                                            }
                                             />
                                         </FormControl>
                                         <FormMessage />

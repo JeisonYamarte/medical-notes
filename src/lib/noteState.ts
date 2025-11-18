@@ -3,6 +3,8 @@
 class NoteState {
     private static instance: NoteState;
     private valor: string = '';
+    private temporalDate: string = '';
+    private textPrediction: string = '';
 
     private constructor() {
 
@@ -16,7 +18,16 @@ class NoteState {
     }
 
     public setValor(n: string): void {
-        this.valor = n;
+        this.temporalDate = n;
+        setTimeout(() => {
+            if (this.valor === this.temporalDate) {
+                this.textPrediction = this.valor;
+                console.log('call function to get prediction');
+            } else {
+                this.valor = this.temporalDate;
+            }
+            
+        }, 2000);
     }
 
     public getValor(): string {
