@@ -29,12 +29,12 @@ import {
     NoteType
 } from '@/lib/schemas/noteSchema';
 import { 
-    generatePrediction,
     getContextualPrediction
 } from '@/lib/predictIA';
 import {
     NoteState
 } from '@/lib/noteState';
+import { get } from 'http';
 
 
 
@@ -64,11 +64,6 @@ export default function NewNotePage(props: { params: Params }) {
         },
     });
 
-
-    useEffect(() => {
-        // Call the debounce function whenever userInput changes
-    }, [userInput]);
-
     useEffect(() => {
         if (id !== 'new') {
         fetch(`/api/notes/${id}`)
@@ -85,12 +80,6 @@ export default function NewNotePage(props: { params: Params }) {
                 console.error('Error fetching note:', error);
             });
         }
-        const fetchPrediction = async () => {
-            const aggText = await generatePrediction("genera una pequeña oracion que sea sinonimo de estoy funcionando bien");
-            form.setValue("content", aggText);
-            console.log('Prediction:', aggText);
-        }
-        //fetchPrediction();
     }, []);
 
     
@@ -144,7 +133,10 @@ export default function NewNotePage(props: { params: Params }) {
         }
         debounceTimer = setTimeout(() => {
             console.log('Debounced input:', form.getValues("content"));
-            // Call your function here with the debounced input
+            const predict = getContextualPrediction(form.getValues("content"));
+            predict.then((res) => {
+                console.log('Prediction result:', res);
+            });
         }, 2000);
     }
 

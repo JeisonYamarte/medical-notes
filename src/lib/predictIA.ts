@@ -11,28 +11,51 @@ const google = createGoogleGenerativeAI({
     apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
 });
 
-export async function generatePrediction(prompt: string) {
-    console.log('API Key exists:', !!process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+async function generatePrediction(userInput: string, documents: (string | null)[][] = [] ) {
     
     const { text } = await generateText({
         model: google('gemini-2.5-pro'), // o el modelo que uses
-        prompt,
+        messages: [
+            {
+                role: 'system',
+                content: `<task>
+                            Eres medicalNotes, autocompletador.
+                            Usa SOLO <context>.
+                            Lee <input>.
+                            Reglas:
+                            - Compleción clínica orientada a notas médicas.
+                            - Máx 10 palabras.
+                            - Máx 100 caracteres.
+                            - Solo predicción, entre # #.
+                            -si no hay contexto responde basado en tu conocimiento.
+                            </task>
+                            `
+            },
+            {
+                role: 'user',
+                content: `<context>
+                            ${documents.join('\n\n')}
+                        </context>
+                        <input>
+                            ${userInput}
+                        </input>
+                        `
+            }
+        ]
     });
     
     return text;
 }
 
-export async function getContextualPrediction(userInput: string = 'como puedo mejorar mi productividad en') {
-    
-    const searchResults = await searchChroma(userInput);
+export async function getContextualPrediction(userInput: string) {
+    const textForPrediction = userInput.slice(-100);
 
-    const response = {
-        ids: searchResults.ids,
-        distances: searchResults.distances,
-        documents: searchResults.documents,
-        metadatas: searchResults.metadatas,
-        embeddings: searchResults.embeddings,
-    }
+    const searchResults: QueryResult = await searchChroma(userInput);
+    
+    const documents: (string | null)[][] = searchResults.documents 
+
+    const response = await generatePrediction(textForPrediction);
+    
 
     return response;
 }
@@ -62,7 +85,6 @@ async function searchChroma(text:string): Promise<QueryResult> {
             'user_id': userId
         }
     })
-    console.log("type of:", typeof results)
     
     return results;
 }
