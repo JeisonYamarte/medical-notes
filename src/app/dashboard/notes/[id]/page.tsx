@@ -46,6 +46,7 @@ export default function NewNotePage(props: { params: Params }) {
     let debounceTimer: NodeJS.Timeout | null = null;
 
     const [userInput, setUserInput] = React.useState<string>('');
+    const [prediction, setPrediction] = React.useState<string>('');
 
     const noteState = NoteState.getInstance();
 
@@ -81,6 +82,8 @@ export default function NewNotePage(props: { params: Params }) {
             });
         }
     }, []);
+
+    
 
     
     
@@ -135,7 +138,7 @@ export default function NewNotePage(props: { params: Params }) {
             console.log('Debounced input:', form.getValues("content"));
             const predict = getContextualPrediction(form.getValues("content"));
             predict.then((res) => {
-                console.log('Prediction result:', res);
+                setPrediction(res);
             });
         }, 2000);
     }
@@ -161,26 +164,40 @@ export default function NewNotePage(props: { params: Params }) {
                                     </FormItem>
                                 )}
                                 />
-                                <FormField
-                                control={form.control}
-                                name="content"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <Textarea 
-                                            className="resize-none w-full h-[400px]" placeholder="Contenido de la nota" 
-                                            {...field} 
-                                            onChange={(e) => {
-                                                    field.onChange(e); 
-                                                    handlerPredict()
-                                                }
-                                            }
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                                />
+                                <div className='relative'>
+                                    <FormField
+                                        control={form.control}
+                                        name="content"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <Textarea 
+                                                    className={`${prediction ? "opacity-0" : ""} resize-none w-full h-[400px]`} placeholder="Contenido de la nota" 
+                                                    {...field} 
+                                                    onChange={(e) => {
+                                                            field.onChange(e);
+                                                            setUserInput(form.getValues("content"));
+                                                            handlerPredict()
+                                                        }
+                                                    }
+                                                    />
+                                                    
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                        />
+                                        {
+                                            prediction &&
+                                            <div className="absolute top-0  w-full h-[400px] rounded-lg " onClick={() => {
+                                                form.setFocus('content')
+                                            }}>
+                                                <h3 className="text-md font-semibold mb-2">{userInput}</h3>
+                                                <p className="text-gray-700">{prediction}</p>
+                                            </div>
+                                        }
+                                </div>
+                                
                             </div>
                             <div>
                                 <h2>Información</h2>

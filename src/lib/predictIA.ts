@@ -55,9 +55,11 @@ export async function getContextualPrediction(userInput: string) {
     const documents: (string | null)[][] = searchResults.documents 
 
     const response = await generatePrediction(textForPrediction);
+
+    const cleanResponde = response.slice(response.indexOf('#') + 1, response.lastIndexOf('#')).trim();
     
 
-    return response;
+    return cleanResponde;
 }
 
 // Searches the ChromaDB collection for relevant documents based on the input text
