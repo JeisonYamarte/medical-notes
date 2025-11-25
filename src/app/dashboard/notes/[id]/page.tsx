@@ -35,6 +35,7 @@ import {
     NoteState
 } from '@/lib/noteState';
 import { get } from 'http';
+import { Span } from 'next/dist/trace';
 
 
 
@@ -129,17 +130,21 @@ export default function NewNotePage(props: { params: Params }) {
 
 
 
-
+    useEffect(() => {
+        handlerPredict();
+    }, [userInput]);
+    
     const handlerPredict = async () => {
         if (debounceTimer) {
             clearTimeout(debounceTimer);
         }
         debounceTimer = setTimeout(() => {
             console.log('Debounced input:', form.getValues("content"));
-            const predict = getContextualPrediction(form.getValues("content"));
+            /*const predict = getContextualPrediction(form.getValues("content"));
             predict.then((res) => {
                 setPrediction(res);
-            });
+            });*/
+            setPrediction('Aquí iría la predicción de la IA...');
         }, 2000);
     }
 
@@ -171,31 +176,33 @@ export default function NewNotePage(props: { params: Params }) {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormControl>
-                                                    <Textarea 
-                                                    className={`${prediction ? "opacity-0" : ""} resize-none w-full h-[400px]`} placeholder="Contenido de la nota" 
+                                                    <textarea 
+                                                    className={`${prediction ? 'text-transparent' : ''} resize-none w-full h-[400px] z-0 p-2 border border-gray-300 rounded-md ring-1 ring-gray-500 bg-white text-black/70 text-xl font-medium`} 
+                                                    placeholder="Contenido de la nota" 
                                                     {...field} 
                                                     onChange={(e) => {
                                                             field.onChange(e);
+                                                            setPrediction('')
                                                             setUserInput(form.getValues("content"));
-                                                            handlerPredict()
                                                         }
                                                     }
+                                                    style={{
+                                                        caretColor:"gray",
+                                                    }}
                                                     />
                                                     
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
-                                        />
-                                        {
-                                            prediction &&
-                                            <div className="absolute top-0  w-full h-[400px] rounded-lg " onClick={() => {
-                                                form.setFocus('content')
-                                            }}>
-                                                <h3 className="text-md font-semibold mb-2">{userInput}</h3>
-                                                <p className="text-gray-700">{prediction}</p>
-                                            </div>
-                                        }
+                                    />
+                                    {
+                                        prediction && 
+                                        <div className="absolute pointer-events-none z-10 top-0 inset-0  w-full h-[400px] p-2 border border-gray-300 rounded-md ring-1 ring-gray-500  text-black/70 text-xl font-medium">
+                                            <span >{userInput}</span>
+                                            <span className="text-black/30">{prediction}</span>
+                                        </div>
+                                    }
                                 </div>
                                 
                             </div>
