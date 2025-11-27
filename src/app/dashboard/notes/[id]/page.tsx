@@ -43,7 +43,7 @@ import { Span } from 'next/dist/trace';
 type Params = Promise<{ id: string }>
 
 export default function NewNotePage(props: { params: Params }) {
-    const { id } = React.use(props.params);
+    const { id: idParams } = React.use(props.params);
     const debounceTimer = React.useRef<NodeJS.Timeout | null>(null);
     const editorRef = React.useRef<HTMLTextAreaElement | null>(null);
 
@@ -52,7 +52,7 @@ export default function NewNotePage(props: { params: Params }) {
 
     const noteState = NoteState.getInstance();
 
-    const titlePage = id === 'new' ? 'Crear nueva nota' : 'Editar nota';
+    const titlePage = idParams === 'new' ? 'Crear nueva nota' : 'Editar nota';
 
     
     const form = useForm<NoteType>({
@@ -68,8 +68,8 @@ export default function NewNotePage(props: { params: Params }) {
     });
 
     useEffect(() => {
-        if (id !== 'new') {
-        fetch(`/api/notes/${id}`)
+        if (idParams !== 'new') {
+        fetch(`/api/notes/${idParams}`)
             .then(async (response) => {
                 if (response.ok) {
                     const resData = await response.json();
@@ -91,26 +91,48 @@ export default function NewNotePage(props: { params: Params }) {
     
 
     const onSubmit = (data: NoteType) => {
-        console.log('form:',data);
-        fetch('/api/notes', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        }).then(async (response) => {
-            if (response.ok) {
-                const resData = await response.json();
-                console.log('Note created successfully:', resData);
-                // Optionally reset the form or redirect the user
-                form.reset();
-            } else {
-                const errorData = await response.json();
-                console.error('Error creating note:', errorData);
-            }
-        }).catch((error) => {
-            console.error('Error creating note:', error);
-        });
+        if ( idParams === 'new') {
+            console.log('form:',data);
+            fetch('/api/notes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            }).then(async (response) => {
+                if (response.ok) {
+                    const resData = await response.json();
+                    console.log('Note created successfully:', resData);
+                    // Optionally reset the form or redirect the user
+                    form.reset();
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error creating note:', errorData);
+                }
+            }).catch((error) => {
+                console.error('Error creating note:', error);
+            });
+        } else {
+            console.log('method PUT form:',data);
+            fetch(`/api/notes/${idParams}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            }).then(async (response) => {
+                if (response.ok) {
+                    const resData = await response.json();
+                    console.log('Note updated successfully:', resData);
+                    // Optionally reset the form or redirect the user
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error updating note:', errorData);
+                }
+            }).catch((error) => {
+                console.error('Error updating note:', error);
+            });
+        }
     };
 
 
