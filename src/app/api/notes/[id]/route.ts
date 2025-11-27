@@ -34,3 +34,19 @@ export async function PUT (request: NextRequest, { params }: { params: { id: str
         return NextResponse.json({ message: "Internal server error" }, { status: 500 });
     }
 }
+
+export async function DELETE (request: NextRequest, { params }: { params: { id: string } }) {
+    try {
+        await connectDB();
+        const { id } = await params;
+
+        const deletedNote = await Note.findByIdAndDelete(id);
+        if (!deletedNote) {
+            return NextResponse.json({ message: "Note not found" }, { status: 404 });
+        }
+        return NextResponse.json({ message: "Note deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting note:", error);
+        return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    }
+}

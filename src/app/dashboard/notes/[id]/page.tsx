@@ -3,6 +3,8 @@ import React, { useCallback, useEffect} from 'react'
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {useDropzone} from 'react-dropzone'
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 import { Button } from "@/components/ui/button"
 import {
@@ -31,11 +33,6 @@ import {
 import { 
     getContextualPrediction
 } from '@/lib/predictIA';
-import {
-    NoteState
-} from '@/lib/noteState';
-import { get } from 'http';
-import { Span } from 'next/dist/trace';
 
 
 
@@ -44,13 +41,12 @@ type Params = Promise<{ id: string }>
 
 export default function NewNotePage(props: { params: Params }) {
     const { id: idParams } = React.use(props.params);
+    const router = useRouter();
     const debounceTimer = React.useRef<NodeJS.Timeout | null>(null);
     const editorRef = React.useRef<HTMLTextAreaElement | null>(null);
 
     const [userInput, setUserInput] = React.useState<string>('');
     const [prediction, setPrediction] = React.useState<string>('');
-
-    const noteState = NoteState.getInstance();
 
     const titlePage = idParams === 'new' ? 'Crear nueva nota' : 'Editar nota';
 
@@ -74,6 +70,7 @@ export default function NewNotePage(props: { params: Params }) {
                 if (response.ok) {
                     const resData = await response.json();
                     console.log('Note fetched successfully:', resData);
+                    toast.success('Note fetched successfully');
                     form.reset(resData);
                 } else {
                     const errorData = await response.json();
@@ -103,14 +100,16 @@ export default function NewNotePage(props: { params: Params }) {
                 if (response.ok) {
                     const resData = await response.json();
                     console.log('Note created successfully:', resData);
-                    // Optionally reset the form or redirect the user
+                    toast.success('Note created successfully');
                     form.reset();
                 } else {
                     const errorData = await response.json();
                     console.error('Error creating note:', errorData);
+                    toast.error('Error creating note');
                 }
             }).catch((error) => {
                 console.error('Error creating note:', error);
+                toast.error('Error creating note');
             });
         } else {
             console.log('method PUT form:',data);
@@ -124,16 +123,43 @@ export default function NewNotePage(props: { params: Params }) {
                 if (response.ok) {
                     const resData = await response.json();
                     console.log('Note updated successfully:', resData);
-                    // Optionally reset the form or redirect the user
+                    toast.success('Note updated successfully');
                 } else {
                     const errorData = await response.json();
                     console.error('Error updating note:', errorData);
+                    toast.error('Error updating note');
                 }
             }).catch((error) => {
                 console.error('Error updating note:', error);
+                toast.error('Error updating note');
             });
         }
     };
+
+    const handleDelete = () => {
+        if (idParams === 'new') {
+            toast.error('Cannot delete a note that has not been created yet.');
+            return;
+        }
+        fetch(`/api/notes/${idParams}`, {
+            method: 'DELETE',
+        }).then(async (response) => {
+            if (response.ok) {
+                const resData = await response.json();
+                console.log('Note deleted successfully:', resData);
+                toast.success('Note deleted successfully');
+                router.push('/dashboard/notes');
+                form.reset();
+            } else {
+                const errorData = await response.json();
+                console.error('Error deleting note:', errorData);
+                toast.error('Error deleting note');
+            }
+        }).catch((error) => {
+            console.error('Error deleting note:', error);
+            toast.error('Error deleting note');
+        });
+    }
 
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -306,7 +332,10 @@ export default function NewNotePage(props: { params: Params }) {
                                     />*/}
                                 </div>
                             </div>
-                            <Button type="submit">Guardar nota</Button>                                
+                            <div className=' flex justify-between'>
+                                <Button type="submit">Guardar nota</Button>                                
+                                <Button type="button" disabled={idParams === 'new'} variant={'destructive'} onClick={handleDelete}>Eliminar nota</Button>
+                            </div>
                         </form>
                     </Form>
                 </div>
