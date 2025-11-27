@@ -44,7 +44,8 @@ type Params = Promise<{ id: string }>
 
 export default function NewNotePage(props: { params: Params }) {
     const { id } = React.use(props.params);
-    let debounceTimer: NodeJS.Timeout | null = null;
+    const debounceTimer = React.useRef<NodeJS.Timeout | null>(null);
+    const editorRef = React.useRef<HTMLTextAreaElement | null>(null);
 
     const [userInput, setUserInput] = React.useState<string>('');
     const [prediction, setPrediction] = React.useState<string>('');
@@ -128,24 +129,25 @@ export default function NewNotePage(props: { params: Params }) {
         onDrop
     })
 
-
-
-    useEffect(() => {
-        handlerPredict();
-    }, [userInput]);
-    
-    const handlerPredict = async () => {
-        if (debounceTimer) {
-            clearTimeout(debounceTimer);
+    const handlerPredict = async (text: string) => {
+        if (debounceTimer.current) {
+            clearTimeout(debounceTimer.current);
         }
-        debounceTimer = setTimeout(() => {
-            console.log('Debounced input:', form.getValues("content"));
-            /*const predict = getContextualPrediction(form.getValues("content"));
+        debounceTimer.current = setTimeout(() => {
+            console.log('Debounced input:', text);
+            const predict = getContextualPrediction(text);
             predict.then((res) => {
                 setPrediction(res);
-            });*/
-            setPrediction('Aquí iría la predicción de la IA...');
+            });
         }, 2000);
+    }
+
+    const handlerKeyDown = (e:React.KeyboardEvent<HTMLTextAreaElement>) => { 
+        if(e.key === 'Tab' && prediction) {
+            e.preventDefault();
+            form.setValue("content", form.getValues("content") + prediction);
+            setPrediction('');
+        }
     }
 
 
@@ -177,18 +179,19 @@ export default function NewNotePage(props: { params: Params }) {
                                             <FormItem>
                                                 <FormControl>
                                                     <textarea 
-                                                    className={`${prediction ? 'text-transparent' : ''} resize-none w-full h-[400px] z-0 p-2 border border-gray-300 rounded-md ring-1 ring-gray-500 bg-white text-black/70 text-xl font-medium`} 
-                                                    placeholder="Contenido de la nota" 
+                                                    className={`${prediction ? '' : ''} resize-none w-full h-[400px] z-0 p-2 border border-gray-300 rounded-md ring-1 ring-gray-500 bg-white text-black/70 text-xl font-medium`} 
                                                     {...field} 
                                                     onChange={(e) => {
                                                             field.onChange(e);
-                                                            setPrediction('')
                                                             setUserInput(form.getValues("content"));
+                                                            handlerPredict(form.getValues("content"));   
                                                         }
                                                     }
+                                                    ref={editorRef}
                                                     style={{
                                                         caretColor:"gray",
                                                     }}
+                                                    onKeyDown={handlerKeyDown}
                                                     />
                                                     
                                                 </FormControl>
@@ -199,7 +202,7 @@ export default function NewNotePage(props: { params: Params }) {
                                     {
                                         prediction && 
                                         <div className="absolute pointer-events-none z-10 top-0 inset-0  w-full h-[400px] p-2 border border-gray-300 rounded-md ring-1 ring-gray-500  text-black/70 text-xl font-medium">
-                                            <span >{userInput}</span>
+                                            <span className='opacity-0'>{userInput}</span>
                                             <span className="text-black/30">{prediction}</span>
                                         </div>
                                     }
