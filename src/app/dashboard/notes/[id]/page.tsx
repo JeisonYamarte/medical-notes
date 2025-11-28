@@ -16,7 +16,6 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, 
     SelectContent, 
     SelectItem, 
@@ -47,6 +46,7 @@ export default function NewNotePage(props: { params: Params }) {
 
     const [userInput, setUserInput] = React.useState<string>('');
     const [prediction, setPrediction] = React.useState<string>('');
+    const [idParamsForUpdate, setIdParamsForUpdate] = React.useState<string | null>(idParams);
 
     const titlePage = idParams === 'new' ? 'Crear nueva nota' : 'Editar nota';
 
@@ -54,7 +54,7 @@ export default function NewNotePage(props: { params: Params }) {
     const form = useForm<NoteType>({
         resolver: zodResolver(noteSchema),
         defaultValues: {
-            title: '',
+            title: 'nueva nota',
             content: '',
             patient: '',
             noteType: NoteTypeEnum.FOLLOWUP,
@@ -87,7 +87,8 @@ export default function NewNotePage(props: { params: Params }) {
     
     
 
-    const onSubmit = (data: NoteType) => {
+    const onSubmit = () => {
+        const data: NoteType = form.getValues();
         if ( idParams === 'new') {
             console.log('form:',data);
             fetch('/api/notes', {
@@ -100,20 +101,19 @@ export default function NewNotePage(props: { params: Params }) {
                 if (response.ok) {
                     const resData = await response.json();
                     console.log('Note created successfully:', resData);
+                    setIdParamsForUpdate(resData.data._id);
                     toast.success('Note created successfully');
-                    form.reset();
+
                 } else {
                     const errorData = await response.json();
-                    console.error('Error creating note:', errorData);
                     toast.error('Error creating note');
                 }
             }).catch((error) => {
-                console.error('Error creating note:', error);
                 toast.error('Error creating note');
             });
         } else {
             console.log('method PUT form:',data);
-            fetch(`/api/notes/${idParams}`, {
+            fetch(`/api/notes/${idParamsForUpdate}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -122,15 +122,12 @@ export default function NewNotePage(props: { params: Params }) {
             }).then(async (response) => {
                 if (response.ok) {
                     const resData = await response.json();
-                    console.log('Note updated successfully:', resData);
                     toast.success('Note updated successfully');
                 } else {
                     const errorData = await response.json();
-                    console.error('Error updating note:', errorData);
                     toast.error('Error updating note');
                 }
             }).catch((error) => {
-                console.error('Error updating note:', error);
                 toast.error('Error updating note');
             });
         }
