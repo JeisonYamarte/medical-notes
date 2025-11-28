@@ -56,7 +56,7 @@ export default function NewNotePage(props: { params: Params }) {
         defaultValues: {
             title: 'nueva nota',
             content: '',
-            patient: '',
+            patient: 'nuevo paciente',
             noteType: NoteTypeEnum.FOLLOWUP,
             urgencyLevel: UrgencyLevelEnum.MEDIUM,
             //tags: [],
@@ -144,7 +144,7 @@ export default function NewNotePage(props: { params: Params }) {
             if (response.ok) {
                 const resData = await response.json();
                 console.log('Note deleted successfully:', resData);
-                toast.success('Note deleted successfully');
+                toast.message('Note deleted successfully');
                 router.push('/dashboard/notes');
                 form.reset();
             } else {
@@ -178,8 +178,11 @@ export default function NewNotePage(props: { params: Params }) {
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
+        
+
         debounceTimer.current = setTimeout(() => {
             console.log('Debounced input:', text);
+            onSubmit();
             const predict = getContextualPrediction(text);
             predict.then((res) => {
                 setPrediction(res);
