@@ -5,11 +5,18 @@ import Note from "@/model/note";
 import { noteSchema, NoteType } from '@/lib/schemas/noteSchema';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getNotes } from "@/lib/notesService";
 
 
-export async function POST(request: NextRequest) {
+export async function getNotes({dateParam = null, titleParam = null, urgencyParam = null}: {dateParam?: string | null, titleParam?: string | null, urgencyParam?: string | null}) {
     try {
+        let start;
+        let end;
+        if (dateParam) {
+            const date = new Date(dateParam);
+            start = new Date(date.setHours(0, 0, 0, 0));
+            end = new Date(date.setHours(23, 59, 59, 999));
+        }
+        
         const session = await getServerSession(authOptions);
         if (!session) {
             return NextResponse.json(
@@ -22,28 +29,32 @@ export async function POST(request: NextRequest) {
         }
 
         await connectDB();
-        const { data, error } = await validateRequest<NoteType>(request, noteSchema);
-
-        if (error || !data) {
-            return error;
-        }
-
-        const newNote = new Note({
-            ...data,
+        const notes  = await Note.find({ 
             userId: session.user.id,
-        });
+            ...(dateParam ? { createdAt: { $gte: start, $lte: end } } : {}),
+            ...(titleParam ? { title: { $regex: titleParam, $options: 'i' } } : {}),
+            ...(urgencyParam ? { urgencyLevel: urgencyParam } : {}),
+        }).sort({ createdAt: -1 });
 
-        await newNote.save();
+        if (!notes) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'No notes found',
+                },
+                { status: 404 }
+            );
+        }
 
         return NextResponse.json(
             {
                 success: true,
-                data: newNote
+                data: notes
             },
             { status: 200 }
         );
     } catch (error: any) {
-        console.error('Error in POST /api/notes:', error);
+        console.error('Error in GET /api/notes:', error);
         return NextResponse.json(
             {
                 success: false,
@@ -52,14 +63,4 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         );
     }
-}
-
-export async function GET(request: NextRequest) {
-    const searchRequest = request.nextUrl.searchParams;
-
-    const dateParam = searchRequest.get('date') || null;
-    const titleParam = searchRequest.get('title') || null;
-    const urgencyParam = searchRequest.get('urgency') || null;
-    
-    return getNotes({ dateParam, titleParam, urgencyParam });
 }

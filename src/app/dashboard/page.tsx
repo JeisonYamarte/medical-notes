@@ -1,16 +1,23 @@
-import { Button } from "@/components/ui/button";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileEdit, Link, Search } from "lucide-react";
+import { FileEdit, Link as LinkIcon, Search } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import Link from "next/link";
+import { getNotes } from "@/lib/notesService";
 
 import { CardDashboard } from "@/components/cardDashboard";
 import { CardPdfResume } from "@/components/cardPdfResume";
+import { NextResponse } from "next/server";
+import { INote } from "@/model/note";
 
 
 
 export default async function DashboardPage() {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions); 
+    const notesResponse: NextResponse = await getNotes({});
+    const notesRecent = await notesResponse.json();
+
 
     return (
         <div className="p-4 bg-gray-100 min-h-screen w-full rounded-xl">
@@ -22,9 +29,15 @@ export default async function DashboardPage() {
                 <div className="flex flex-col justify-center p-4 col-span-4 bg-white rounded-xl h-[110px]">
                     <h2 className="font-semibold">Acciones rapidas</h2>
                     <div className="flex">
-                        <Button className="m-2 bg-blue-500"><FileEdit className="mr-1" />Nueva Nota</Button>
-                        <Button variant={'outline'} className="m-2"><Link className="mr-1" />Subir PDF</Button>
-                        <Button variant={'outline'} className="m-2"><Search className="mr-1" />Buscar nota</Button>
+                        <Link
+                            href="/dashboard/notes/new"
+                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 h-9 px-4 m-2 border hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring gap-2 bg-blue-600 text-white"
+                        >
+                            <FileEdit />
+                            Nueva Nota
+                        </Link>
+                        <Link href="/dashboard/upload" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 h-9 px-4 m-2 border hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring gap-2 bg-background"><LinkIcon className="mr-1" />Subir PDF</Link>
+                        <Link href="/dashboard/notes" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 h-9 px-4 m-2 border hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring gap-2 bg-background"><Search className="mr-1" />Buscar nota</Link>
                     </div>
                 </div>
                 <div className="col-span-2 row-span-4 row-start-2 bg-white rounded-xl">
@@ -32,14 +45,19 @@ export default async function DashboardPage() {
                         <h2 className="font-semibold">Notas Recientes</h2>
                         <ScrollArea className="flex flex-col gap-2 max-h-[480px]">
                             <div className="grid grid-cols-1 gap-2 h-full p-5">
-                                <CardDashboard title="Consulta con el Dr. Smith" titleNote="Revisión anual y chequeo de presión arterial." date="2024-10-01" />
-                                <CardDashboard title="Resultados de laboratorio" titleNote="Análisis de sangre y orina." date="2024-09-25" />
-                                <CardDashboard title="Vacunación contra la gripe" titleNote="Primera dosis administrada." date="2024-09-15" />
-                                <CardDashboard title="Consulta con el Dr. Lee" titleNote="Seguimiento de la alergia estacional." date="2024-09-10" />
-                                <CardDashboard title="Examen de visión" titleNote="Actualización de la receta de lentes." date="2024-08-30" />
-                                <CardDashboard title="Consulta con el Dr. Patel" titleNote="Dolor de espalda y recomendaciones de fisioterapia." date="2024-08-20" />
-                                <CardDashboard title="Chequeo dental" titleNote="Limpieza y revisión de caries." date="2024-08-15" />
-                                <CardDashboard title="Consulta con el Dr. Gomez" titleNote="Control de diabetes y ajuste de medicación." date="2024-08-05" />
+                                {notesRecent.success && notesRecent.data.length > 0 ? (
+                                    notesRecent.data.map((note: INote) => (
+                                        <CardDashboard
+                                            key={note._id?.toString()}
+                                            id={note._id?.toString() || ''}
+                                            title={note.title}
+                                            content={note.content}
+                                            date={new Date(note.createdAt).toLocaleDateString("es-ES")}
+                                        />
+                                    ))
+                                ) : (
+                                    <p>No recent notes available.</p>
+                                )}
                             </div>
                         </ScrollArea>
                     </div>
