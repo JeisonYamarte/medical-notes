@@ -1,6 +1,6 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileEdit, Link as LinkIcon, Search } from "lucide-react";
+import { FileEdit, Link as LinkIcon, Search, FileEditIcon, FileSpreadsheetIcon } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
@@ -61,7 +61,10 @@ export default async function DashboardPage() {
                                         />
                                     ))
                                 ) : (
-                                    <p>No recent notes available.</p>
+                                    <div className="w-full h-100 flex flex-col items-center">
+                                        <FileEditIcon className="h-20 w-10" />
+                                        <p>No recent notes available.</p>
+                                    </div>
                                 )}
                             </div>
                         </ScrollArea>
@@ -82,7 +85,10 @@ export default async function DashboardPage() {
                                         />
                                     ))
                                 ) : (
-                                    <p>No uploaded PDFs available.</p>
+                                    <div className="w-full h-100 flex flex-col items-center">
+                                        <FileSpreadsheetIcon className="h-20 w-10" />
+                                        <p>No recent pdfs available.</p>
+                                    </div>
                                 )}
                             </div>
                         </ScrollArea>
