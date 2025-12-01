@@ -1,4 +1,6 @@
 "use server"
+import { NextResponse } from 'next/server';
+
 import { extractText } from 'unpdf';
 import { cloudinary } from './cloudinaryConfig';
 import { type PdfUploadType } from './schemas/pdfSchema';
@@ -136,7 +138,7 @@ export async function getPdfList() {
         createdAt: pdf.createdAt,
     }));
 
-    return formattedList;
+    return NextResponse.json({ success: true, data: formattedList });
 }
 
 // Extracts text content from a PDF file and logs the results

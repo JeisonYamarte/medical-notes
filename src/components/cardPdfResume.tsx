@@ -1,6 +1,6 @@
 import { Link } from "lucide-react";
 
-function CardPdfResume({ title, description }: { title: string; description: string }) {
+function CardPdfResume({ title, size, createdAt }: { title: string; size: string; createdAt: string }) {
     return (
         <div className="flex flex-row bg-white rounded-xl p-4 shadow w-full h-full hover:bg-gray-50 cursor-pointer">
             <div className="w-10 h-full flex items-center justify-center mr-4">
@@ -8,7 +8,7 @@ function CardPdfResume({ title, description }: { title: string; description: str
             </div>
             <div className="w-full max-w-full">
                 <h3 className="font-semibold truncate">{title}</h3>
-                <p className="text-sm text-gray-600 truncate">{description}</p>
+                <p className="text-sm text-gray-600 truncate">{size} - {new Date(createdAt).toLocaleDateString("es-ES")}</p>
             </div>
         </div>
     );

@@ -30,7 +30,7 @@ export default function UploadPage() {
 
     useEffect(() => {
         (async ()=>{
-            const pdflist = await getPdfList();
+            const pdflist = await getPdfList().then(res => res.json()).then(data => data.data);
             setFiles(pdflist);
             setIsListLoading(false);
         })()

@@ -4,19 +4,24 @@ import { FileEdit, Link as LinkIcon, Search } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
-import { getNotes } from "@/lib/notesService";
+import { NextResponse } from "next/server";
 
 import { CardDashboard } from "@/components/cardDashboard";
 import { CardPdfResume } from "@/components/cardPdfResume";
-import { NextResponse } from "next/server";
 import { INote } from "@/model/note";
+import { getNotes } from "@/lib/notesService";
+import { getPdfList } from "@/lib/pdfService";
 
 
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions); 
+    
     const notesResponse: NextResponse = await getNotes({});
     const notesRecent = await notesResponse.json();
+
+    const pdfResponse: NextResponse = await getPdfList();
+    const pdfList = await pdfResponse.json();
 
 
     return (
@@ -67,13 +72,18 @@ export default async function DashboardPage() {
                         <h2 className="font-semibold">PDF Upload</h2>
                         <ScrollArea className="flex flex-col gap-2 max-h-[480px]">
                             <div className="grid grid-cols-1 gap-2 h-full p-5">
-                                <CardPdfResume title="Informe de laboratorio - 2024" description="Análisis de sangre completo y resultados de orina." />
-                                <CardPdfResume title="Receta médica - Dr. Smith" description="Medicamentos prescritos para la hipertensión." />
-                                <CardPdfResume title="Informe de radiología - 2024" description="Resultados de la radiografía de tórax." />
-                                <CardPdfResume title="Historial de vacunación" description="Registro completo de vacunas administradas." />
-                                <CardPdfResume title="Informe de alergias" description="Resultados de pruebas de alergia y recomendaciones." />
-                                <CardPdfResume title="Resumen de consulta - Dr. Lee" description="Notas de la consulta sobre alergias estacionales." />
-                                <CardPdfResume title="Informe de visión" description="Resultados del examen de la vista y receta de lentes." />
+                                {pdfList.success && pdfList.data.length > 0 ? (
+                                    pdfList.data.map((pdf: any) => (
+                                        <CardPdfResume
+                                            key={pdf.id}
+                                            title={pdf.originalName}
+                                            size={(pdf.fileSize / 1024).toFixed(2) + ' KB'}
+                                            createdAt={pdf.createdAt}
+                                        />
+                                    ))
+                                ) : (
+                                    <p>No uploaded PDFs available.</p>
+                                )}
                             </div>
                         </ScrollArea>
                     </div>
