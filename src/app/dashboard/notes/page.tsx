@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,10 +60,22 @@ export default function NotesPage() {
 
     const [notesToView, setNotesToView] = useState<Array<INote>>([]);
     const [date, setDate] = useState<Date | undefined>(undefined);
-    const [open, setOpen] = useState(false);
+    const [openCalendar, setOpenCalendar] = useState(false);
     const [orderDate, setOrderDate] = useState<"Ascendente" | "Descendente">("Descendente");
 
+    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
     const router = useRouter();
+
+    const DebouncedFetch = (search: string) => {
+        if (debounceTimer.current) {
+            clearTimeout(debounceTimer.current);
+        }
+
+        debounceTimer.current = setTimeout(() => {
+            dispatch({ type: 'SET_TITLE', payload: search})
+        }, 1000);
+    }
 
     const stateStyleHandler = (status: UrgencyLevelEnum) => {
         switch (status) {
@@ -116,7 +128,9 @@ export default function NotesPage() {
                     <Input
                     className="pl-10 pr-3 py-2 w-full bg-white"
                     placeholder="buscar por titulo"
-                    onChange={(e) => dispatch({ type: 'SET_TITLE', payload: e.target.value })}
+                    onChange={(e) => {
+                        DebouncedFetch(e.target.value);
+                    }}
                 />
                 </div>
                 <Select onValueChange={(value) => dispatch({ type: 'SET_URGENCY', payload: value })}>
@@ -131,7 +145,7 @@ export default function NotesPage() {
                     </SelectContent>
                 </Select>
                 <div className="flex gap-4">
-                    <Popover open={open} onOpenChange={setOpen}>
+                    <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
                         <PopoverTrigger asChild>
                         <Button
                             variant="outline"
@@ -149,7 +163,7 @@ export default function NotesPage() {
                             captionLayout="dropdown"
                             onSelect={(date) => {
                             setDate(date)
-                            setOpen(false)
+                            setOpenCalendar(false)
                             }}
                         />
                         </PopoverContent>
@@ -172,16 +186,23 @@ export default function NotesPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {
-                    notesToView?.map((note, index) => (
-                        <TableRow className=" h-10 text-lg cursor-pointer " key={note._id?.toString() || `note-${index}`} onClick={ () => router.push(`/dashboard/notes/${note._id}`)}>
-                            <TableCell className="font-medium">{note.patient}</TableCell>
-                            <TableCell className="text-blue-500">{note.title}</TableCell>
-                            <TableCell>{new Date(note.createdAt).toLocaleDateString()}</TableCell>
-                            <TableCell>{note.noteType}</TableCell>
-                            <TableCell><span className={`${stateStyleHandler(note.urgencyLevel)} font-semibold rounded-full text-center p-1 px-3 border-2`}>{note.urgencyLevel}</span></TableCell>
+                    { 
+                    notesToView.length > 0 ? notesToView?.map((note, index) => (
+                            <TableRow className=" h-10 text-lg cursor-pointer " key={note._id?.toString() || `note-${index}`} onClick={ () => router.push(`/dashboard/notes/${note._id}`)}>
+                                <TableCell className="font-medium">{note.patient}</TableCell>
+                                <TableCell className="text-blue-500">{note.title}</TableCell>
+                                <TableCell>{new Date(note.createdAt).toLocaleDateString()}</TableCell>
+                                <TableCell>{note.noteType}</TableCell>
+                                <TableCell><span className={`${stateStyleHandler(note.urgencyLevel)} font-semibold rounded-full text-center p-1 px-3 border-2`}>{note.urgencyLevel}</span></TableCell>
+                            </TableRow>
+                        ))
+                        :
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center py-4 text-lg text-gray-500">
+                                No se encontraron notas.
+                            </TableCell>
                         </TableRow>
-                    ))}
+                    }
                 </TableBody>
             </Table>
             <Pagination className="flex justify-center mt-4 h-10">
