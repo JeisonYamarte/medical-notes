@@ -1,6 +1,8 @@
 "use client"
 import { useState, useEffect, useReducer, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -39,8 +41,10 @@ import { UrgencyLevelEnum } from "@/lib/schemas/noteSchema";
 import { INote } from "@/model/note";
 
 const initialState = { 
+    date: null,
     title: null,
-    urgency: null
+    urgency: null,
+    skip: 1
 }
 
 function reducer(state: typeof initialState, action: any) {
@@ -49,6 +53,12 @@ function reducer(state: typeof initialState, action: any) {
             return { ...state, title: action.payload };
         case 'SET_URGENCY':
             return { ...state, urgency: action.payload };
+        case 'SET_SKIP':
+            return { ...state, skip: action.payload };
+        case 'SET_DATE':
+            return { ...state, date: action.payload };
+        case 'RESET':
+            return initialState;
         default:
             return state;
     }
@@ -59,9 +69,11 @@ export default function NotesPage() {
     const [state, dispatch] = useReducer(reducer, initialState);
 
     const [notesToView, setNotesToView] = useState<Array<INote>>([]);
-    const [date, setDate] = useState<Date | undefined>(undefined);
     const [openCalendar, setOpenCalendar] = useState(false);
     const [orderDate, setOrderDate] = useState<"Ascendente" | "Descendente">("Descendente");
+    const [totalPage, setTotalPage] = useState<number>(0);
+
+    const limit = 5;
 
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -90,7 +102,7 @@ export default function NotesPage() {
     
     useEffect(() => {
 
-        let query = '/api/notes?';
+        let query = `/api/notes?limit=${limit}&skip=${state.skip}&`;
 
         if (state.title) {
             query += `title=${encodeURIComponent(state.title)}&`;
@@ -98,20 +110,24 @@ export default function NotesPage() {
         if (state.urgency && state.urgency !== 'all') {
             query += `urgency=${encodeURIComponent(state.urgency)}&`;
         }
-        if (date) {
-            query += `date=${encodeURIComponent(date.toISOString())}&`;
+        if (state.date) {
+            query += `date=${encodeURIComponent(state.date.toISOString())}&`;
         }
 
         fetch(query)
             .then(res => res.json())
             .then(data => {
                 setNotesToView(data.data);
-                console.log('Fetched notes on mount:', data.data);
+                const paginationTotal = Math.ceil(data.total / limit);
+                if(paginationTotal !== 0){
+                    setTotalPage(paginationTotal);
+                }
+                console.log('Fetched notes on mount:', data);
             })
             .catch(err => {
                 console.error('Error fetching notes:', err);
             });
-    }, [state.title, state.urgency, date]);
+    }, [state]);
 
     return (
         <div className="p-4 bg-gray-100 min-h-screen w-full rounded-xl gap-5 flex flex-col border-2 border-gray-200">
@@ -153,16 +169,16 @@ export default function NotesPage() {
                             className="w-48 h-10 gap-4 font-semibold items-center justify-start text-lg"
                         >
                         <CalendarIcon className="scale-120" />
-                            {date ? date.toLocaleDateString() : "Select date"}
+                            {state.date ? state.date.toLocaleDateString() : "Select date"}
                         </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
                         <Calendar
                             mode="single"
-                            selected={date}
+                            selected={state.date}
                             captionLayout="dropdown"
                             onSelect={(date) => {
-                            setDate(date)
+                            dispatch({ type: 'SET_DATE', payload: date });
                             setOpenCalendar(false)
                             }}
                         />
@@ -206,24 +222,47 @@ export default function NotesPage() {
                 </TableBody>
             </Table>
             <Pagination className="flex justify-center mt-4 h-10">
-                <PaginationPrevious >
-                    <Button variant="outline" className="px-3">Anterior</Button>
-                </PaginationPrevious>
+
+                {
+                    state.skip === 1 ? null : (
+                        <PaginationPrevious className={`${state.skip === 1 ? 'disabled' : ''} cursor-pointer`} onClick={() => {
+                        dispatch({ type: 'SET_SKIP', payload: state.skip - 1})
+                        }}/>
+                    )
+                }
+                
+                
+                
                 <PaginationContent>
+                    {
+                        state.skip > 1 && (
+                            <PaginationItem>
+                                <PaginationLink className="px-3" >{state.skip - 1}</PaginationLink>
+                            </PaginationItem>
+                        )
+                    }
                     <PaginationItem>
-                        <PaginationLink className="px-3" href="#" aria-label="Go to page 1">1</PaginationLink>
+                        <PaginationLink className="px-3"  isActive>{state.skip}</PaginationLink>
                     </PaginationItem>
-                    <PaginationItem>
-                        <PaginationLink className="px-3" href="#" aria-label="Go to page 2" isActive>2</PaginationLink>
-                    </PaginationItem>
-                    <PaginationEllipsis />
-                    <PaginationItem>
-                        <PaginationLink className="px-3" href="#" aria-label="Go to page 5">5</PaginationLink>
-                    </PaginationItem>
+                    { state.skip + 1 >= totalPage ? null :  (
+                        <PaginationEllipsis />
+                    )}
+
+                    { state.skip === totalPage ? null :  (
+                        <PaginationItem>
+                            <PaginationLink className="px-3" >{totalPage}</PaginationLink>
+                        </PaginationItem>
+                    )}
                 </PaginationContent>
-                <PaginationNext >
-                    <Button variant="outline" className="px-3">Siguiente</Button>
-                </PaginationNext>
+                
+                {
+                    state.skip === totalPage || totalPage === 0 ? null : (
+                        <PaginationNext className="cursor-pointer" onClick={() => {
+                            dispatch({ type: 'SET_SKIP', payload: state.skip + 1})
+                        }}/>
+                    )
+                }
+                
             </Pagination>
         </div>
     );

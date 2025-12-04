@@ -60,6 +60,8 @@ export async function GET(request: NextRequest) {
     const dateParam = searchRequest.get('date') || null;
     const titleParam = searchRequest.get('title') || null;
     const urgencyParam = searchRequest.get('urgency') || null;
+    const limitParam = searchRequest.get('limit') || null;
+    const skipParam = searchRequest.get('skip') || null;
     
-    return getNotes({ dateParam, titleParam, urgencyParam });
+    return getNotes({ dateParam, titleParam, urgencyParam, limit:Number(limitParam), skip: Number(skipParam) });
 }

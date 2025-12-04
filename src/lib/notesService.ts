@@ -1,13 +1,23 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { validateRequest } from "@/lib/validateRequest";
 import Note from "@/model/note";
-import { noteSchema, NoteType } from '@/lib/schemas/noteSchema';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 
-export async function getNotes({dateParam = null, titleParam = null, urgencyParam = null}: {dateParam?: string | null, titleParam?: string | null, urgencyParam?: string | null}) {
+export async function getNotes({
+    dateParam = null, 
+    titleParam = null, 
+    urgencyParam = null, 
+    limit = 0, 
+    skip = 0
+}: {
+    dateParam?: string | null, 
+    titleParam?: string | null, 
+    urgencyParam?: string | null, 
+    limit?: number , 
+    skip?: number 
+}) {
     try {
         let start;
         let end;
@@ -29,14 +39,28 @@ export async function getNotes({dateParam = null, titleParam = null, urgencyPara
         }
 
         await connectDB();
-        const notes  = await Note.find({ 
+
+        const getTotal: boolean = skip === 1; 
+        
+        const [data, total] = await Promise.all([
+            Note.find({ 
             userId: session.user.id,
             ...(dateParam ? { createdAt: { $gte: start, $lte: end } } : {}),
             ...(titleParam ? { title: { $regex: titleParam, $options: 'i' } } : {}),
             ...(urgencyParam ? { urgencyLevel: urgencyParam } : {}),
-        }).sort({ createdAt: -1 });
+            }).sort({ 
+                createdAt: -1 
+            }).limit(limit).skip((skip - 1) * limit),
+            
+            getTotal ? Note.countDocuments({
+                userId: session.user.id,
+                ...(dateParam ? { createdAt: { $gte: start, $lte: end } } : {}),
+                ...(titleParam ? { title: { $regex: titleParam, $options: 'i' } } : {}),
+                ...(urgencyParam ? { urgencyLevel: urgencyParam } : {}),
+            }) : Promise.resolve(0)
+        ])
 
-        if (!notes) {
+        if (!data) {
             return NextResponse.json(
                 {
                     success: false,
@@ -49,7 +73,8 @@ export async function getNotes({dateParam = null, titleParam = null, urgencyPara
         return NextResponse.json(
             {
                 success: true,
-                data: notes
+                data,
+                total
             },
             { status: 200 }
         );
