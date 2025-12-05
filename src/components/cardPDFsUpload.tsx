@@ -2,13 +2,15 @@ import { FileText } from "lucide-react";
 
 function CardPDFsUpload({title, date, size}: {title?: string, date?: string, size?: number}) {
     return (
-        <div className='flex h-[100px] items-center w-full border-2 p-1 border-gray-300  rounded-lg bg-gray-50 cursor-pointer'>
-            <FileText className='text-blue-500 m-1 w-10 h-10' />
-            <div className="flex justify-between text-sm">
-                <h3 className=' font-bold '>{title}</h3>
-                <div className="flex flex-col text-right justify-between">
-                    <p className='text-gray-500'>{date}</p>
-                    <p className='text-gray-500'>{size} KB</p>
+        <div className='flex h-[100px] items-center w-full border-2 p-3 border-gray-300 rounded-lg bg-gray-50 cursor-pointer gap-3'>
+            <div className='flex-shrink-0'>
+                <FileText className='text-blue-500 w-12 h-12' />
+            </div>
+            <div className="flex flex-col flex-1 min-w-0 gap-1">
+                <p className='font-bold text-base leading-tight line-clamp-2'>{title}</p>
+                <div className="flex gap-3 text-sm text-gray-500">
+                    <p>{date}</p>
+                    <p>{size} KB</p>
                 </div>
             </div>
         </div>

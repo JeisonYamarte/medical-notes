@@ -17,7 +17,7 @@ import { getPdfList } from "@/lib/pdfService";
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions); 
     
-    const notesResponse: NextResponse = await getNotes({});
+    const notesResponse: NextResponse = await getNotes({limit: 5, skip: 1});
     const notesRecent = await notesResponse.json();
 
     const pdfResponse: NextResponse = await getPdfList();

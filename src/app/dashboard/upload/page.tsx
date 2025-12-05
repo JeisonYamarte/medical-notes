@@ -11,7 +11,6 @@ import { CardPDFsUpload } from '@/components/cardPDFsUpload'
 import { 
     uploadPDF, 
     savePdfMetadata, 
-    getPdfList, 
     saveEmbebingText
 } from '@/lib/pdfService'
 
@@ -23,18 +22,29 @@ export default function UploadPage() {
     const [isUploading, setIsUploading] = useState(false)
     const [isListLoading, setIsListLoading] = useState(true)
     const [progressBar, setProgressBar] = useState(0);
+    const [handlerPdf, setHandlerPdf] = useState<File[]>([]);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
+        setHandlerPdf(acceptedFiles);
         setProgressBar(0)
     }, [])
 
     useEffect(() => {
         (async ()=>{
-            const pdflist = await getPdfList().then(res => res.json()).then(data => data.data);
-            setFiles(pdflist);
+            fetch('/api/pdf')
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                setFiles(data.data);
+            }
+        })
+        .catch(err => {
+            console.error('Error fetching PDF list:', err);
+        }).finally(() => {
             setIsListLoading(false);
+        })
         })()
-    }, [isListLoading]);
+    }, []);
 
     const handlePdf = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -44,17 +54,17 @@ export default function UploadPage() {
         setProgressBar(10);
 
         const formData = new FormData();
-        formData.append('file', acceptedFiles[0]); 
+        formData.append('file', handlerPdf[0]); 
         
         uploadPDF(formData)
             .then((result) => {
                 setProgressBar(70);
                 if (result.status === 200 && result.url) {
                     const pdfData: PdfUploadType = {
-                        fileName: acceptedFiles[0].name,
-                        originalName: acceptedFiles[0].name,
+                        fileName: handlerPdf[0].name,
+                        originalName: handlerPdf[0].name,
                         fileUrl: result.url, // Usa la URL retornada
-                        fileSize: acceptedFiles[0].size,
+                        fileSize: handlerPdf[0].size,
                     }
                     
                     return savePdfMetadata(pdfData);
@@ -117,29 +127,42 @@ export default function UploadPage() {
                         }
                     </div>
                     <div className='w-full '>
-                        {acceptedFiles.length > 0 && <h2>Archivos seleccionados</h2>}
-                        <ul className='h-100 overflow-y-auto mt-10 '>
-                            {acceptedFiles.map((file) => (
+                        {handlerPdf.length > 0 && <h2>Archivos seleccionados</h2>}
+                        <ul className='h-auto overflow-y-auto mt-10 '>
+                            {handlerPdf.map((file) => (
                                 <CardListPDF key={file.name} title={file.name} size={file.size} progressBar={progressBar}/>
                             ))}
                         </ul>
                     </div>
-                    <div className='w-full flex justify-end'>
-                        <Button 
-                            onClick={(e) => handlePdf(e)} 
-                            className='bg-blue-500' 
-                            disabled={acceptedFiles.length === 0 || isUploading}
-                        >
-                            {isUploading ? 'Subiendo...' : 'Subir archivos'}
-                        </Button>
-                    </div>
+                    { handlerPdf.length > 0 && 
+                        <div className='w-full flex justify-between'>
+                            <Button 
+                                variant='destructive'
+                                onClick={() => {
+                                    setHandlerPdf([]);
+                                }}
+                            >Elminar</Button>
+                            <Button 
+                                onClick={(e) => handlePdf(e)} 
+                                className='bg-blue-500' 
+                                disabled={handlerPdf.length === 0 || isUploading}
+                            >
+                                {isUploading ? 'Subiendo...' : 'Subir archivo'}
+                            </Button>
+                        </div>
+                    }
                 </div>
             </main>
             <aside className='w-1/3 max-w-sm'>
                 <h2 className="text-xl font-bold mb-4">PDFs subidos</h2>
                 <div className='flex flex-col items-start w-full border-2 border-gray-300  rounded-lg bg-gray-50 cursor-pointer p-3 gap-5 h-[500px] overflow-y-auto'>
                     {isListLoading ? (
-                        <p className='text-gray-500'>Cargando lista de PDFs...</p>
+                        <div className="flex justify-center items-center w-full h-full">
+                            <div className="relative w-12 h-12 sm:w-16 sm:h-16">
+                                <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+                                <div className="absolute inset-0 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+                            </div>
+                        </div>
                     ) : (
                         files.length === 0 ? (
                             <p className='text-gray-500'>No hay PDFs subidos.</p>

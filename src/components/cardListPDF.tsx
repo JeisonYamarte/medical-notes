@@ -10,7 +10,6 @@ function CardListPDF({title, size, progressBar}: { title: string; size: number; 
                 <span>{size / 1024} KB</span>
                 <Progress className="w-full mt-2 [&>div]:bg-blue-500" value={progressBar} />
             </div>
-            <X className="m-2 cursor-pointer scale-120" />
         </li>
     );
 }
