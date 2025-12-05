@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect, useReducer, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,10 +34,16 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination"
-import { Search, PlusCircle, Calendar as CalendarIcon, ArrowUpNarrowWide } from "lucide-react";
+import { Search, 
+    PlusCircle, 
+    Calendar as CalendarIcon, 
+    ArrowUpNarrowWide,
+    RefreshCw
+} from "lucide-react";
 
 import { UrgencyLevelEnum } from "@/lib/schemas/noteSchema";
 import { INote } from "@/model/note";
+import { tr } from "zod/v4/locales";
 
 const initialState = { 
     date: null,
@@ -67,6 +72,7 @@ function reducer(state: typeof initialState, action: any) {
 export default function NotesPage() {
     //state for find in DB
     const [state, dispatch] = useReducer(reducer, initialState);
+    const [loading, setLoading] = useState<boolean>(true);
 
     const [notesToView, setNotesToView] = useState<Array<INote>>([]);
     const [openCalendar, setOpenCalendar] = useState(false);
@@ -101,7 +107,7 @@ export default function NotesPage() {
     }
     
     useEffect(() => {
-
+        setLoading(true);
         let query = `/api/notes?limit=${limit}&skip=${state.skip}&`;
 
         if (state.title) {
@@ -122,10 +128,11 @@ export default function NotesPage() {
                 if(paginationTotal !== 0){
                     setTotalPage(paginationTotal);
                 }
-                console.log('Fetched notes on mount:', data);
+                setLoading(false);
             })
             .catch(err => {
                 console.error('Error fetching notes:', err);
+                setLoading(false);
             });
     }, [state]);
 
@@ -188,6 +195,9 @@ export default function NotesPage() {
                         setOrderDate(orderDate === "Ascendente" ? "Descendente" : "Ascendente")
                         setNotesToView(notesToView.reverse());
                     }} variant={'outline'} className="w-80 h-10 gap-4 font-semibold items-center justify-start text-lg"><ArrowUpNarrowWide className="scale-120"/>Ordenar por fecha: {orderDate}</Button>
+                    <Button variant={'outline'} className="h-10 gap-4 font-semibold items-center justify-start text-lg" onClick={() => {
+                        dispatch({ type: 'RESET' });
+                    }}><RefreshCw className="scale-120"/>Resetear filtros</Button>
                 </div>
             </div>
             {/* Mejorar tabla con https://tanstack.com/table/v8 */ }
@@ -202,7 +212,18 @@ export default function NotesPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    { 
+                    { loading ? (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center py-8">
+                                <div className="flex justify-center items-center">
+                                    <div className="relative w-12 h-12 sm:w-16 sm:h-16">
+                                        <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+                                        <div className="absolute inset-0 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+                                    </div>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    ) : (
                     notesToView.length > 0 ? notesToView?.map((note, index) => (
                             <TableRow className=" h-10 text-lg cursor-pointer " key={note._id?.toString() || `note-${index}`} onClick={ () => router.push(`/dashboard/notes/${note._id}`)}>
                                 <TableCell className="font-medium">{note.patient}</TableCell>
@@ -213,12 +234,14 @@ export default function NotesPage() {
                             </TableRow>
                         ))
                         :
-                        <TableRow>
-                            <TableCell colSpan={5} className="text-center py-4 text-lg text-gray-500">
-                                No se encontraron notas.
-                            </TableCell>
-                        </TableRow>
-                    }
+                        (
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-center py-4 text-lg text-gray-500">
+                                    No se encontraron notas.
+                                </TableCell>
+                            </TableRow>
+                        )
+                    )}
                 </TableBody>
             </Table>
             <Pagination className="flex justify-center mt-4 h-10">
