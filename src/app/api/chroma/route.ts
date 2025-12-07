@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveEmbebingText } from "@/lib/pdfService";
+import { saveEmbebingText } from "@/service/pdfService";
 
 export async function POST(request: NextRequest) {
     const body = await request.json();

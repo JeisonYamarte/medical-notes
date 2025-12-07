@@ -31,7 +31,7 @@ import {
 } from '@/lib/schemas/noteSchema';
 import { 
     getContextualPrediction
-} from '@/lib/predictIA';
+} from '@/service/IAservice';
 
 
 

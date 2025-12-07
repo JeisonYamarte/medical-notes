@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { validateRequest } from "@/lib/validateRequest";
+import { validateRequest } from "@/utils/validateRequest";
 import Note from "@/model/note";
 import { noteSchema, NoteType } from '@/lib/schemas/noteSchema';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getNotes } from "@/lib/notesService";
+import { getNotes } from "@/service/notesService";
 
 
 export async function POST(request: NextRequest) {

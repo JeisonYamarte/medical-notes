@@ -9,8 +9,8 @@ import { NextResponse } from "next/server";
 import { CardDashboard } from "@/components/cardDashboard";
 import { CardPdfResume } from "@/components/cardPdfResume";
 import { INote } from "@/model/note";
-import { getNotes } from "@/lib/notesService";
-import { getPdfList } from "@/lib/pdfService";
+import { getNotes } from "@/service/notesService";
+import { getPdfList } from "@/service/pdfService";
 
 
 

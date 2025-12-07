@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/model/user";
-import { validateRequest } from "@/lib/validateRequest";
+import { validateRequest } from "@/utils/validateRequest";
 import { userSchema, UserType } from "@/lib/schemas/userSchema";
 //import type { UserS } from "@/lib/schemas/userSchema"
 

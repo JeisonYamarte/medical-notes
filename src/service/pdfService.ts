@@ -2,13 +2,13 @@
 import { NextResponse } from 'next/server';
 
 import { extractText } from 'unpdf';
-import { cloudinary } from './cloudinaryConfig';
-import { type PdfUploadType } from './schemas/pdfSchema';
+import { cloudinary } from '../lib/cloudinaryConfig';
+import { type PdfUploadType } from '../lib/schemas/pdfSchema';
 import { getServerSession } from 'next-auth';
-import { authOptions } from './auth';
+import { authOptions } from '../lib/auth';
 import Pdf  from '@/model/pdf';
 import { connectDB } from "@/lib/mongodb";
-import { getCollection } from '@/model/contextFiles';
+import { addToChroma } from './chroma';
 
 // Uploads a PDF file to Cloudinary and returns the secure URL
 export async function uploadPDF(file: FormData) {
@@ -84,35 +84,7 @@ export async function saveEmbebingText(FormData: FormData, pdfId: string) {
             
         const chunks = splitTextByWords(cleanText);
 
-        const session = await getServerSession(authOptions);
-
-        if (!session) {
-            throw new Error('Unauthorized');
-        }
-
-        const userId = session.user.id;
-
-        const ids = chunks.map((chunk, index) => `${userId}_pdfId_${pdfId}_(${index})_${Date.now()}`);
-
-        try {
-            const collection = await getCollection();
-
-            await collection.add({
-                ids: ids,
-                documents: chunks,
-                metadatas: chunks.map(() => ({
-                    user_id: userId,
-                    file_id: pdfId,
-                }))
-            })
-
-        } catch (error) {
-            console.error('Error saving embeddings:', error);
-        } finally {
-            console.log('Embeddings process completed.');
-        }
-
-        
+        await addToChroma(chunks, pdfId);
 }
 
 

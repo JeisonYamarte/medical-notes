@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getPdfList } from "@/lib/pdfService";
+import { getPdfList } from "@/service/pdfService";
 
 
 export async function GET(request: NextRequest) {

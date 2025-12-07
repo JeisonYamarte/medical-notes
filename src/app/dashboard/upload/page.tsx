@@ -26,7 +26,7 @@ import {
     uploadPDF, 
     savePdfMetadata, 
     saveEmbebingText
-} from '@/lib/pdfService'
+} from '@/service/pdfService'
 
 
 
@@ -52,15 +52,14 @@ export default function UploadPage() {
         .then(data => {
             if(data.success){
                 setFiles(data.data);
+                setIsListLoading(false);
             }
         })
         .catch(err => {
             console.error('Error fetching PDF list:', err);
-        }).finally(() => {
-            setIsListLoading(false);
         })
         })()
-    }, []);
+    }, [isUploading]);
 
     const handlePdf = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -94,14 +93,11 @@ export default function UploadPage() {
             })
             .then(() => {
                 setProgressBar(100);
+                setIsUploading(false);
             })
             .catch((error) => {
                 console.error('Error uploading PDF:', error);
             })
-            .finally(() => {
-                setProgressBar(100);
-                setIsUploading(false);
-            });
     }
 
     const downloadPDF = () => {
