@@ -141,6 +141,7 @@ export async function getPdfList() {
     return NextResponse.json({ success: true, data: formattedList });
 }
 
+
 // Extracts text content from a PDF file and logs the results
 async function extractTextFromPdf(file: FormData) {
     const pdfFile = file.get('file') as File; 

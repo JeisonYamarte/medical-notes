@@ -1,8 +1,8 @@
 import { FileText } from "lucide-react";
 
-function CardPDFsUpload({title, date, size}: {title?: string, date?: string, size?: number}) {
+function CardPDFsUpload({title, date, size, onClick}: {title?: string, date?: string, size?: number, onClick?: () => void}) {
     return (
-        <div className='flex h-[100px] items-center w-full border-2 p-3 border-gray-300 rounded-lg bg-gray-50 cursor-pointer gap-3'>
+        <div onClick={onClick} className='flex h-[100px] items-center w-full border-2 p-3 border-gray-300 rounded-lg bg-gray-50 cursor-pointer gap-3'>
             <div className='flex-shrink-0'>
                 <FileText className='text-blue-500 w-12 h-12' />
             </div>

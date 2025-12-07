@@ -1,9 +1,23 @@
 "use client"
 import React, { useCallback, useState, useEffect } from 'react'
 import {useDropzone} from 'react-dropzone'
-import { CloudUpload } from 'lucide-react'
+import { 
+    CloudUpload,
+    Trash2,
+    Download
+    } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 import type { PdfUploadType } from '@/lib/schemas/pdfSchema'
 import { CardListPDF } from '@/components/cardListPDF'
@@ -23,6 +37,8 @@ export default function UploadPage() {
     const [isListLoading, setIsListLoading] = useState(true)
     const [progressBar, setProgressBar] = useState(0);
     const [handlerPdf, setHandlerPdf] = useState<File[]>([]);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [selectedPdf, setSelectedPdf] = useState<{ id: string; fileName: string; originalName: string; fileUrl: string; fileSize: number; createdAt: Date; } | null>(null);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         setHandlerPdf(acceptedFiles);
@@ -88,6 +104,17 @@ export default function UploadPage() {
             });
     }
 
+    const downloadPDF = () => {
+        if (!selectedPdf) return;
+
+        const downloadUrl = selectedPdf.fileUrl.replace('/upload/', '/upload/fl_attachment/');
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = selectedPdf.originalName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
     const {
         getRootProps, 
         getInputProps, 
@@ -168,11 +195,46 @@ export default function UploadPage() {
                             <p className='text-gray-500'>No hay PDFs subidos.</p>
                         ) :
                         files.map((file) => (
-                            <CardPDFsUpload key={file.id} title={file.fileName} date={file.createdAt ? new Date(file.createdAt).toLocaleDateString() : ''} size={file.fileSize} />
+                            <CardPDFsUpload 
+                                key={file.id} 
+                                title={file.fileName} 
+                                date={file.createdAt ? new Date(file.createdAt).toLocaleDateString() : ''} 
+                                size={file.fileSize}
+
+                                onClick={() => {
+                                    setOpenDialog(true);
+                                    setSelectedPdf(file);
+                                }} 
+                            />
                         ))
                     )}
                 </div>
             </aside>
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Detalles del PDF</DialogTitle>
+                        <DialogDescription>
+                            Información del PDF seleccionado.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4">
+                        <p><strong>Nombre del archivo:</strong> {selectedPdf?.fileName}</p>
+                        <p><strong>Nombre original:</strong> {selectedPdf?.originalName}</p>
+                        <p><strong>Tamaño del archivo:</strong> {selectedPdf ? (selectedPdf.fileSize / 1024).toFixed(2) + ' KB' : ''}</p>
+                        <p><strong>Fecha de creación:</strong> {selectedPdf?.createdAt ? new Date(selectedPdf.createdAt).toLocaleString() : ''}</p>
+                    </div>
+                    <div className='flex justify-between px-10'>
+                        <Button className='bg-blue-500' onClick={downloadPDF}>Descargar<Download /></Button>
+                        <Button variant={'destructive'} >Eliminar<Trash2 /></Button>
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button>Close</Button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     ); 
 }
