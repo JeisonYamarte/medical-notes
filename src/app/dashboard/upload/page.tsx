@@ -49,7 +49,6 @@ export default function UploadPage() {
 
     useEffect(() => {
         (async ()=>{
-            setIsListLoading(true);
             fetch('/api/pdf')
             .then(res => res.json())
             .then(data => {
@@ -62,13 +61,12 @@ export default function UploadPage() {
                 console.error('Error fetching PDF list:', err);
             })
         })()
-    }, [isUploading, isDeleting]);
+    }, [isListLoading]);
 
     const handlePdf = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
         setIsUploading(true);
-        setIsListLoading(true);
         setProgressBar(10);
 
         const formData = new FormData();
@@ -97,6 +95,8 @@ export default function UploadPage() {
             .then(() => {
                 setProgressBar(100);
                 setIsUploading(false);
+                setIsListLoading(true);
+                setHandlerPdf([]);
             })
             .catch((error) => {
                 console.error('Error uploading PDF:', error);
@@ -114,6 +114,7 @@ export default function UploadPage() {
                     setOpenDialog(false);
                     setIsDeleting(false);
                     setSelectedPdf(null);
+                    setIsListLoading(true);
                 } else {
                     console.error('Error deleting PDF:', result.message);
                 }
@@ -245,11 +246,11 @@ export default function UploadPage() {
                     </div>
                     <div className='flex justify-between px-10'>
                         <Button className='bg-blue-500' onClick={downloadPDF}>Descargar<Download /></Button>
-                        <Button variant={'destructive'} onClick={handleDelete}>Eliminar<Trash2 /></Button>
+                        <Button variant={'destructive'} onClick={handleDelete}>Eliminar {isDeleting ? <Spinner /> : <Trash2 />}</Button>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button>Close</Button>
+                            <Button disabled={isDeleting} >Close</Button>
                         </DialogClose>
                     </DialogFooter>
                 </DialogContent>
