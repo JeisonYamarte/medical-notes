@@ -2,49 +2,15 @@
 import { NextResponse } from 'next/server';
 
 import { extractText } from 'unpdf';
-import { cloudinary } from '../lib/cloudinaryConfig';
 import { type PdfUploadType } from '../lib/schemas/pdfSchema';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../lib/auth';
 import Pdf  from '@/model/pdf';
 import { connectDB } from "@/lib/mongodb";
-import { addToChroma } from './chroma';
+import { addToChroma } from './chromaservice';
+import { deletePDF } from './cloudinaryService';
+import { deleteChromaByFileId } from './chromaservice';
 
-// Uploads a PDF file to Cloudinary and returns the secure URL
-export async function uploadPDF(file: FormData) {
-    const pdfFile = file.get('file') as File; 
-
-    if (!pdfFile) {
-        return { status: 400, message: 'No file uploaded' };
-    }
-
-    const bytes = await pdfFile.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    const uploadResult = await new Promise<{ secure_url: string }>((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-            {
-                resource_type: 'raw',
-                folder: 'my-medical-note/pdfs',
-                public_id: `pdf-${Date.now()}.pdf`,
-            },
-            (error, result) => {
-                if (error) return reject(error);
-                resolve(result as { secure_url: string });
-            }
-        )
-        uploadStream.end(buffer);
-    })
-
-    if (!uploadResult) {
-        return { status: 500, message: 'Upload failed' };
-    }
-
-    const url = uploadResult.secure_url;
-    
-    return { status: 200, message: 'Upload successful', url };
-
-}
 
 // Saves PDF metadata to the database associated with the current user
 export async function savePdfMetadata(data: PdfUploadType) {
@@ -111,6 +77,41 @@ export async function getPdfList() {
     }));
 
     return NextResponse.json({ success: true, data: formattedList });
+}
+
+export async function deletePdfById(pdfId: string) {
+    try {
+        await connectDB();
+
+        const pdf = await Pdf.findById(pdfId);
+
+        if (!pdf) {
+            console.error('PDF not found:', pdfId);
+            return { status: 404, message: 'PDF not found' };
+        }
+
+        const publicId = pdf.fileUrl.split('my-medical-note/')[1];
+
+        const deleteResult = await deletePDF( publicId );
+
+        if (deleteResult.status !== 200) {
+            console.error('Cloudinary deletion error:', deleteResult);
+            return { status: 500, message: 'Failed to delete PDF from Cloudinary' };
+        }
+
+        await deleteChromaByFileId(pdfId);
+
+        const deletionResult = await Pdf.deleteOne({ _id: pdfId });
+
+        if (deletionResult.deletedCount === 0) {
+            console.error('PDF not found during deletion:', pdfId);
+            return { status: 404, message: 'PDF not found' };
+        }
+
+        return { status: 200, message: 'PDF deleted successfully' };
+    } catch (error) {
+        return { status: 500, message: 'Error deleting PDF', error };
+    }
 }
 
 

@@ -8,6 +8,7 @@ import {
     } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { Spinner } from "@/components/ui/spinner"
 import {
     Dialog,
     DialogClose,
@@ -16,23 +17,24 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 
 import type { PdfUploadType } from '@/lib/schemas/pdfSchema'
 import { CardListPDF } from '@/components/cardListPDF'
 import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
-import { 
-    uploadPDF, 
+import {
     savePdfMetadata, 
-    saveEmbebingText
+    saveEmbebingText,
+    deletePdfById
 } from '@/service/pdfService'
+import { uploadPDF } from '@/service/cloudinaryService'
 
 
 
 
 export default function UploadPage() {
     const [files, setFiles] = useState<{ id: string; fileName: string; originalName: string; fileUrl: string; fileSize: number; createdAt: Date; }[]>([])
+    const [isDeleting, setIsDeleting] = useState(false) 
     const [isUploading, setIsUploading] = useState(false)
     const [isListLoading, setIsListLoading] = useState(true)
     const [progressBar, setProgressBar] = useState(0);
@@ -47,19 +49,20 @@ export default function UploadPage() {
 
     useEffect(() => {
         (async ()=>{
+            setIsListLoading(true);
             fetch('/api/pdf')
-        .then(res => res.json())
-        .then(data => {
-            if(data.success){
-                setFiles(data.data);
-                setIsListLoading(false);
-            }
-        })
-        .catch(err => {
-            console.error('Error fetching PDF list:', err);
-        })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success){
+                    setFiles(data.data);
+                    setIsListLoading(false);
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching PDF list:', err);
+            })
         })()
-    }, [isUploading]);
+    }, [isUploading, isDeleting]);
 
     const handlePdf = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -99,6 +102,26 @@ export default function UploadPage() {
                 console.error('Error uploading PDF:', error);
             })
     }
+
+    const handleDelete = () => {
+        if (!selectedPdf) return;
+
+        setIsDeleting(true);
+
+        deletePdfById(selectedPdf.id)
+            .then((result) => {
+                if (result.status === 200) {
+                    setOpenDialog(false);
+                    setIsDeleting(false);
+                    setSelectedPdf(null);
+                } else {
+                    console.error('Error deleting PDF:', result.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error deleting PDF:', error);
+            });
+    };
 
     const downloadPDF = () => {
         if (!selectedPdf) return;
@@ -222,7 +245,7 @@ export default function UploadPage() {
                     </div>
                     <div className='flex justify-between px-10'>
                         <Button className='bg-blue-500' onClick={downloadPDF}>Descargar<Download /></Button>
-                        <Button variant={'destructive'} >Eliminar<Trash2 /></Button>
+                        <Button variant={'destructive'} onClick={handleDelete}>Eliminar<Trash2 /></Button>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>

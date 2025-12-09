@@ -64,3 +64,27 @@ export async function addToChroma(chunks: string[], fileId: string) {
         console.log('Embeddings process completed.');
     }
 }
+
+export async function deleteChromaByFileId(fileId: string) {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+        throw new Error('Unauthorized');
+    }
+    const userId = session.user.id;
+
+    try {
+        const collection = await getCollection();
+
+        await collection.delete({
+            where: {
+                $and: [
+                    { 'user_id': userId },
+                    { 'file_id': fileId }
+                ]
+            }
+        });
+    } catch (error) {
+        console.error('Error deleting embeddings from ChromaDB:', error);
+        throw error;
+    }
+}

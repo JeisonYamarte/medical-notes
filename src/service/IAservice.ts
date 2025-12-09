@@ -1,7 +1,7 @@
 "use server";
 import { generateText } from 'ai';
 import { google } from '../lib/gemini';
-import { searchChroma } from './chroma';
+import { searchChroma } from './chromaservice';
 import type { QueryResult } from 'chromadb';
 
 
