@@ -131,7 +131,7 @@ export default function SignIn() {
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4 justify-center items-center">
                     <Button type="submit" form="formSignIn" className="bg-blue-500 w-full">Iniciar Sesion</Button>
-                    <Button variant="outline" className="w-full" onClick={(e) => SignInGoogle(e)}>Iniciar con Google</Button>
+                    <Button variant="outline" className="w-full" onClick={(e) => SignInGoogle(e)}>Iniciar con Google <img src="https://res.cloudinary.com/dy8f3lczs/image/upload/v1765284756/icons8-google_shmeju.svg" alt="Google logo" className="inline-block w-5 h-5 ml-2" /></Button>
                     <CardAction className="w-auto mx-auto font-semibold">¿No tienes una cuenta? <Link className="text-blue-500" href="/sign-up">Regístrate</Link></CardAction>
                 </CardFooter>
             </Card>

@@ -12,7 +12,7 @@ import {
     SidebarGroupLabel
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import { HomeIcon, FileText, CloudUpload, Settings, LogOut} from "lucide-react";
+import { HomeIcon, FileText, CloudUpload, LogOut} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -40,19 +40,17 @@ const items = [
         url: '/dashboard/upload',
         icon: CloudUpload
     },
-    {
-        title: 'Settings',
-        url: '/dashboard/settings',
-        icon: Settings
-    }
 ]
 
 
 function AppSidebar() {
     const router = useRouter();
+
     const handleSignOut = () => {
-        signOut();
-        router.push('/sign-in');
+        signOut().then(() => {
+            router.push('/sign-in');
+        }
+        );
     };
 
     return (
