@@ -1,4 +1,5 @@
 "use client"
+import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -72,7 +73,7 @@ export default function SignIn() {
         <>
             <Card className="w-[360px] h-auto flex flex-col gap-10">
                 <CardHeader className="flex flex-col items-center justify-center gap-2">
-                    <img className="w-20 h-20" src="https://cdn-icons-png.flaticon.com/512/11711/11711702.png" alt="Logo"  />
+                    <Image className="w-20 h-20" width={80} height={80} src="/v1765285713/icono_nota_medica_nezds1.svg" alt="Logo"  />
                     <CardTitle className="text-2xl font-bold">Bienvenido de nuevo</CardTitle>
                     <CardDescription >Inicie sesión en su cuenta para continuar.</CardDescription>
                 </CardHeader>
@@ -131,7 +132,7 @@ export default function SignIn() {
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4 justify-center items-center">
                     <Button type="submit" form="formSignIn" className="bg-blue-500 w-full">Iniciar Sesion</Button>
-                    <Button variant="outline" className="w-full" onClick={(e) => SignInGoogle(e)}>Iniciar con Google <img src="https://res.cloudinary.com/dy8f3lczs/image/upload/v1765284756/icons8-google_shmeju.svg" alt="Google logo" className="inline-block w-5 h-5 ml-2" /></Button>
+                    <Button variant="outline" className="w-full" onClick={(e) => SignInGoogle(e)}>Iniciar con Google <Image src="/v1765284756/icons8-google_shmeju.svg" alt="Google logo" className="inline-block w-5 h-5 ml-2" width={20} height={20} /></Button>
                     <CardAction className="w-auto mx-auto font-semibold">¿No tienes una cuenta? <Link className="text-blue-500" href="/sign-up">Regístrate</Link></CardAction>
                 </CardFooter>
             </Card>

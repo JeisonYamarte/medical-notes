@@ -16,6 +16,7 @@ import { HomeIcon, FileText, CloudUpload, LogOut} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import Image from "next/image";
 
 
 
@@ -57,7 +58,7 @@ function AppSidebar() {
             <Sidebar>
                 <SidebarContent className="h-full"> 
                     <SidebarHeader className="flex flex-row items-center gap-2">
-                        <img className="w-8 h-8" src="https://cdn-icons-png.flaticon.com/512/11711/11711702.png" alt="logo" />
+                        <Image className="w-8 h-8"  width={32} height={32} src="/v1765285713/icono_nota_medica_nezds1.svg"  alt="logo" />
                         <h3>Medical Notes</h3>
                     </SidebarHeader>
                     <SidebarGroup>

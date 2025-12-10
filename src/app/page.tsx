@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 
 import { CardLandingPage } from "@/components/cardLandingPage";
 import { Button } from "@/components/ui/button"
+import Image from "next/image";
 
 
 
@@ -17,7 +18,7 @@ export default function Home() {
     <main className={`flex min-h-screen flex-col items-center justify-between mx-auto  ${inter.className}`}>
       <header className={`flex w-full cap-5 items-center justify-between text-center max-h-[700px] bg-[#F0F3FF] py-20`}>
         <div className="w-full flex flex-col gap-7 max-w-[1140px] mx-auto">
-          <img className="mx-auto" src="https://cdn-icons-png.flaticon.com/512/11711/11711702.png" alt="Medical Note" width={100} height={100} /> {/* se recomienda usar Image de next.js pero hay que usar el next config y agregar el dominio desde donde vienen las imagenes */}
+          <Image className="mx-auto" src="/v1765285713/icono_nota_medica_nezds1.svg" alt="Medical Note" width={100} height={100} />
           <div className="flex flex-col">
             <h1 className="text-5xl font-bold">Medical Note:</h1>
             <h2 className="text-3xl font-bold">Gestión de Notas Médicas Simplificada y Segura</h2>
