@@ -5,11 +5,8 @@ export default async function SignInLayout({ children }: { children: React.React
     const session = await getServerSession(authOptions);
     
 
-    console.log("layout sign in pre if");
     if (session !== null) {
-        console.log("sigin in entro en el if");
         redirect("/dashboard");
-        return null;
     }
     console.log("layout sign in post if");
     

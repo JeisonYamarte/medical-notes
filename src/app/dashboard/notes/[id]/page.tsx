@@ -22,6 +22,7 @@ import { Select,
     SelectTrigger, 
     SelectValue 
 } from "@/components/ui/select"
+import { Spinner } from '@/components/ui/spinner';
 
 import { 
     noteSchema, 
@@ -46,7 +47,8 @@ export default function NewNotePage(props: { params: Params }) {
 
     const [userInput, setUserInput] = React.useState<string>('');
     const [prediction, setPrediction] = React.useState<string>('');
-    const [idParamsForUpdate, setIdParamsForUpdate] = React.useState<string | null>(idParams);
+    const [idParamsForUpdate, setIdParamsForUpdate] = React.useState<string>(idParams);
+    const [isPredicting, setIsPredicting] = React.useState<boolean>(false);
 
     const titlePage = idParams === 'new' ? 'Crear nueva nota' : 'Editar nota';
 
@@ -69,7 +71,6 @@ export default function NewNotePage(props: { params: Params }) {
             .then(async (response) => {
                 if (response.ok) {
                     const resData = await response.json();
-                    console.log('Note fetched successfully:', resData);
                     toast.success('Note fetched successfully');
                     form.reset(resData);
                 } else {
@@ -90,7 +91,6 @@ export default function NewNotePage(props: { params: Params }) {
     const onSubmit = () => {
         const data: NoteType = form.getValues();
         if ( idParams === 'new') {
-            console.log('form:',data);
             fetch('/api/notes', {
                 method: 'POST',
                 headers: {
@@ -106,13 +106,12 @@ export default function NewNotePage(props: { params: Params }) {
 
                 } else {
                     const errorData = await response.json();
-                    toast.error('Error creating note');
+                    toast.error('Error creating note', errorData.message);
                 }
             }).catch((error) => {
                 toast.error('Error creating note');
             });
         } else {
-            console.log('method PUT form:',data);
             fetch(`/api/notes/${idParamsForUpdate}`, {
                 method: 'PUT',
                 headers: {
@@ -134,16 +133,15 @@ export default function NewNotePage(props: { params: Params }) {
     };
 
     const handleDelete = () => {
-        if (idParams === 'new') {
+        if (idParamsForUpdate === 'new') {
             toast.error('Cannot delete a note that has not been created yet.');
             return;
         }
-        fetch(`/api/notes/${idParams}`, {
+        fetch(`/api/notes/${idParamsForUpdate}`, {
             method: 'DELETE',
         }).then(async (response) => {
             if (response.ok) {
                 const resData = await response.json();
-                console.log('Note deleted successfully:', resData);
                 toast.message('Note deleted successfully');
                 router.push('/dashboard/notes');
                 form.reset();
@@ -179,13 +177,16 @@ export default function NewNotePage(props: { params: Params }) {
             clearTimeout(debounceTimer.current);
         }
         
+        setIsPredicting(true);
 
         debounceTimer.current = setTimeout(() => {
-            console.log('Debounced input:', text);
+            
             onSubmit();
-            const predict = getContextualPrediction(text);
+            const predict = getContextualPrediction(text); //useCompletions (libreria) podriia mejorar esto, incluso con el stop()
             predict.then((res) => {
                 setPrediction(res);
+                setIsPredicting(false);
+                toast.message(' Press TAB to accept the prediction.');
             });
         }, 2000);
     }
@@ -251,7 +252,13 @@ export default function NewNotePage(props: { params: Params }) {
                                         prediction && 
                                         <div className="absolute pointer-events-none z-10 top-0 inset-0  w-full h-[400px] p-2 border border-gray-300 rounded-md ring-1 ring-gray-500  text-black/70 text-xl font-medium">
                                             <span className='opacity-0'>{userInput}</span>
-                                            <span className="text-black/30">{prediction}</span>
+                                            {isPredicting ?
+                                                <span>
+                                                    <Spinner className='inline' />
+                                                </span>
+                                            :
+                                                <span className='text-gray-500'>{prediction}</span>
+                                            }
                                         </div>
                                     }
                                 </div>
@@ -334,7 +341,7 @@ export default function NewNotePage(props: { params: Params }) {
                             </div>
                             <div className=' flex justify-between'>
                                 <Button type="submit">Guardar nota</Button>                                
-                                <Button type="button" disabled={idParams === 'new'} variant={'destructive'} onClick={handleDelete}>Eliminar nota</Button>
+                                <Button type="button" disabled={idParamsForUpdate === 'new'} variant={'destructive'} onClick={handleDelete}>Eliminar nota</Button>
                             </div>
                         </form>
                     </Form>

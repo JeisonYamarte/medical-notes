@@ -22,6 +22,7 @@ async function generatePrediction(userInput: string, documents: (string | null)[
                             - Máx 100 caracteres.
                             - Solo predicción, entre # #.
                             -si no hay contexto responde basado en tu conocimiento.
+                            - No agregues signos de puntuación innecesarios, ni punto final.
                             </task>
                             `
             },
