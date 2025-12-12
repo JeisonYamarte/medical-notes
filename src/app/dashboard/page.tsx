@@ -25,31 +25,43 @@ export default async function DashboardPage() {
 
 
     return (
-        <div className="p-4 bg-gray-100 min-h-screen w-full rounded-xl">
+        <div className="p-3 sm:p-4 md:p-5 lg:p-6 bg-gray-100 min-h-dvh w-full rounded-xl">
             <div>
-                <h2 className="text-xl font-bold mb-4">Dashboard</h2>             
-                <p className="text-gray-600 mb-6">Bienvenido a tu panel de control, {session?.user?.name}!</p>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">Dashboard</h2>             
+                <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Bienvenido a tu panel de control, {session?.user?.name}!</p>
             </div>
-            <div className="grid grid-cols-4 grid-rows-5 gap-4 w-full h-full">
-                <div className="flex flex-col justify-center p-4 col-span-4 bg-white rounded-xl h-[110px]">
-                    <h2 className="font-semibold">Acciones rapidas</h2>
-                    <div className="flex">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4 w-full h-full">
+                <div className="flex flex-col justify-center p-3 sm:p-4 lg:col-span-4 bg-white rounded-xl min-h-[100px]">
+                    <h2 className="font-semibold text-sm sm:text-base mb-3">Acciones rapidas</h2>
+                    <div className="flex flex-wrap gap-2">
                         <Link
                             href="/dashboard/notes/new"
-                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 h-9 px-4 m-2 border hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring gap-2 bg-blue-600 text-white"
+                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 h-9 px-3 sm:px-4 border hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring gap-2 bg-blue-600 text-white flex-1 sm:flex-initial min-w-[140px]"
                         >
-                            <FileEdit />
+                            <FileEdit className="w-4 h-4" />
                             Nueva Nota
                         </Link>
-                        <Link href="/dashboard/upload" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 h-9 px-4 m-2 border hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring gap-2 bg-background"><LinkIcon className="mr-1" />Subir PDF</Link>
-                        <Link href="/dashboard/notes" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 h-9 px-4 m-2 border hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring gap-2 bg-background"><Search className="mr-1" />Buscar nota</Link>
+                        <Link 
+                            href="/dashboard/upload" 
+                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 h-9 px-3 sm:px-4 border hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring gap-2 bg-background flex-1 sm:flex-initial min-w-[140px]"
+                        >
+                            <LinkIcon className="w-4 h-4" />
+                            Subir PDF
+                        </Link>
+                        <Link 
+                            href="/dashboard/notes" 
+                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 h-9 px-3 sm:px-4 border hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring gap-2 bg-background flex-1 sm:flex-initial min-w-[140px]"
+                        >
+                            <Search className="w-4 h-4" />
+                            Buscar nota
+                        </Link>
                     </div>
                 </div>
-                <div className="col-span-2 row-span-4 row-start-2 bg-white rounded-xl">
-                    <div className="max-w-[600px] mx-auto gap-2 h-full p-5 flex flex-col">
-                        <h2 className="font-semibold">Notas Recientes</h2>
-                        <ScrollArea className="flex flex-col gap-2 max-h-[480px]">
-                            <div className="grid grid-cols-1 gap-2 h-full p-5">
+                <div className="lg:col-span-2 bg-white rounded-xl">
+                    <div className="max-w-full lg:max-w-[600px] mx-auto gap-2 h-full p-3 sm:p-4 md:p-5 flex flex-col">
+                        <h2 className="font-semibold text-sm sm:text-base">Notas Recientes</h2>
+                        <ScrollArea className="flex flex-col gap-2 max-h-[400px] sm:max-h-[450px] md:max-h-[480px]">
+                            <div className="grid grid-cols-1 gap-2 h-full p-2 sm:p-3 md:p-5">
                                 {notesRecent.success && notesRecent.data.length > 0 ? (
                                     notesRecent.data.map((note: INote) => (
                                         <CardDashboard
@@ -61,20 +73,20 @@ export default async function DashboardPage() {
                                         />
                                     ))
                                 ) : (
-                                    <div className="w-full h-100 flex flex-col items-center">
-                                        <FileEditIcon className="h-20 w-10" />
-                                        <p>No recent notes available.</p>
+                                    <div className="w-full h-100 flex flex-col items-center py-8">
+                                        <FileEditIcon className="h-16 w-16 sm:h-20 sm:w-20 text-gray-300" />
+                                        <p className="text-xs sm:text-sm text-gray-500 mt-2">No recent notes available.</p>
                                     </div>
                                 )}
                             </div>
                         </ScrollArea>
                     </div>
                 </div>
-                <div className="col-span-2 row-span-4 col-start-3 row-start-2 bg-white rounded-xl">
-                    <div className="max-w-[600px] mx-auto gap-2 h-full p-5 flex flex-col">
-                        <h2 className="font-semibold">PDF Upload</h2>
-                        <ScrollArea className="flex flex-col gap-2 max-h-[480px]">
-                            <div className="grid grid-cols-1 gap-2 h-full p-5">
+                <div className="lg:col-span-2 bg-white rounded-xl">
+                    <div className="max-w-full lg:max-w-[600px] mx-auto gap-2 h-full p-3 sm:p-4 md:p-5 flex flex-col">
+                        <h2 className="font-semibold text-sm sm:text-base">PDF Upload</h2>
+                        <ScrollArea className="flex flex-col gap-2 max-h-[400px] sm:max-h-[450px] md:max-h-[480px]">
+                            <div className="grid grid-cols-1 gap-2 h-full p-2 sm:p-3 md:p-5">
                                 {pdfList.success && pdfList.data.length > 0 ? (
                                     pdfList.data.map((pdf: any) => (
                                         <CardPdfResume
@@ -85,9 +97,9 @@ export default async function DashboardPage() {
                                         />
                                     ))
                                 ) : (
-                                    <div className="w-full h-100 flex flex-col items-center">
-                                        <FileSpreadsheetIcon className="h-20 w-10" />
-                                        <p>No recent pdfs available.</p>
+                                    <div className="w-full h-100 flex flex-col items-center py-8">
+                                        <FileSpreadsheetIcon className="h-16 w-16 sm:h-20 sm:w-20 text-gray-300" />
+                                        <p className="text-xs sm:text-sm text-gray-500 mt-2">No recent pdfs available.</p>
                                     </div>
                                 )}
                             </div>

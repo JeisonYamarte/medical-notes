@@ -90,7 +90,7 @@ export default function NewNotePage(props: { params: Params }) {
 
     const onSubmit = () => {
         const data: NoteType = form.getValues();
-        if ( idParams === 'new') {
+        if ( idParamsForUpdate === 'new') {
             fetch('/api/notes', {
                 method: 'POST',
                 headers: {
