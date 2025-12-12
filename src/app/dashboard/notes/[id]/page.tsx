@@ -46,7 +46,7 @@ export default function NewNotePage(props: { params: Params }) {
     const editorRef = React.useRef<HTMLTextAreaElement | null>(null);
 
     const [userInput, setUserInput] = React.useState<string>('');
-    const [prediction, setPrediction] = React.useState<string>('');
+    const [prediction, setPrediction] = React.useState<string | null>(null);
     const [idParamsForUpdate, setIdParamsForUpdate] = React.useState<string>(idParams);
     const [isPredicting, setIsPredicting] = React.useState<boolean>(false);
 
@@ -180,41 +180,57 @@ export default function NewNotePage(props: { params: Params }) {
         setIsPredicting(true);
 
         debounceTimer.current = setTimeout(() => {
-            
+            const sizeWindows = window.innerWidth;
+            console.log('sizeWindows', sizeWindows);
             onSubmit();
-            const predict = getContextualPrediction(text); //useCompletions (libreria) podriia mejorar esto, incluso con el stop()
-            predict.then((res) => {
+            const predict = getContextualPrediction(text) //useCompletions (libreria) podriia mejorar esto, incluso con el stop()
+            .then((res) => {
                 setPrediction(res);
                 setIsPredicting(false);
-                toast.message(' Press TAB to accept the prediction.');
+                
+                console.log('sizeWindows', sizeWindows);
+                if (sizeWindows < 780) {
+                    toast.message(' Press the text to add.');
+                } else {
+                    toast.message(' Press TAB to accept the prediction.');
+                    console.log('sizeWindows', sizeWindows);
+                }
             });
         }, 2000);
+    }
+
+    const handleTouch = () =>{
+        if (!prediction) return;
+
+        form.setValue("content", form.getValues("content") + prediction);  
+        setPrediction(null);
+        editorRef.current?.focus();
     }
 
     const handlerKeyDown = (e:React.KeyboardEvent<HTMLTextAreaElement>) => { 
         if(e.key === 'Tab' && prediction) {
             e.preventDefault();
             form.setValue("content", form.getValues("content") + prediction);
-            setPrediction('');
+            setPrediction(null);
         }
     }
 
 
     return (
-        <div>
-            <h2 className="text-xl font-bold mb-4">{titlePage}</h2>
-            <div className="flex gap-5">
-                <div className="w-2/3">
+        <div className="px-2 sm:px-4 md:px-6">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">{titlePage}</h2>
+            <div className="flex flex-col xl:flex-row gap-4 sm:gap-5">
+                <div className="w-full xl:w-2/3">
                     <Form {...form}>
-                        <form id="new-note-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <div className=" flex flex-col gap-5">
+                        <form id="new-note-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5 md:space-y-6">
+                            <div className="flex flex-col gap-4 sm:gap-5">
                                 <FormField
                                 control={form.control}
                                 name="title"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormControl>
-                                            <Input placeholder="Título de la nota" {...field} />
+                                            <Input className="text-sm sm:text-base" placeholder="Título de la nota" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -228,7 +244,7 @@ export default function NewNotePage(props: { params: Params }) {
                                             <FormItem>
                                                 <FormControl>
                                                     <textarea 
-                                                    className={`${prediction ? '' : ''} resize-none w-full h-[400px] z-0 p-2 border border-gray-300 rounded-md ring-1 ring-gray-500 bg-white text-black/70 text-xl font-medium`} 
+                                                    className={`${prediction ? '' : ''} resize-none w-full h-[300px] sm:h-[350px] md:h-[400px] z-0 p-2 sm:p-3 border border-gray-300 rounded-md ring-1 ring-gray-500 bg-white text-black/70 text-base sm:text-lg md:text-xl font-medium`} 
                                                     {...field} 
                                                     onChange={(e) => {
                                                             field.onChange(e);
@@ -250,14 +266,14 @@ export default function NewNotePage(props: { params: Params }) {
                                     />
                                     {
                                         prediction && 
-                                        <div className="absolute pointer-events-none z-10 top-0 inset-0  w-full h-[400px] p-2 border border-gray-300 rounded-md ring-1 ring-gray-500  text-black/70 text-xl font-medium">
+                                        <div className="absolute pointer-events-none z-10 top-0 inset-0 w-full h-[300px] sm:h-[350px] md:h-[400px] p-2 sm:p-3 border border-gray-300 rounded-md ring-1 ring-gray-500 text-black/70 text-base sm:text-lg md:text-xl font-medium">
                                             <span className='opacity-0'>{userInput}</span>
                                             {isPredicting ?
                                                 <span>
                                                     <Spinner className='inline' />
                                                 </span>
                                             :
-                                                <span className='text-gray-500'>{prediction}</span>
+                                                <span onClick={handleTouch} className='text-gray-500 pointer-events-auto'>{prediction}</span>
                                             }
                                         </div>
                                     }
@@ -265,16 +281,16 @@ export default function NewNotePage(props: { params: Params }) {
                                 
                             </div>
                             <div>
-                                <h2>Información</h2>
-                                <div className="grid grid-cols-2 grid-row-2 gap-4">
+                                <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Información</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <FormField
                                     control={form.control}
                                     name="patient"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Paciente</FormLabel>
+                                            <FormLabel className="text-sm sm:text-base">Paciente</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Nombre del paciente" {...field} />
+                                                <Input className="text-sm sm:text-base" placeholder="Nombre del paciente" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -285,10 +301,10 @@ export default function NewNotePage(props: { params: Params }) {
                                     name="noteType"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Tipo de nota</FormLabel>
+                                            <FormLabel className="text-sm sm:text-base">Tipo de nota</FormLabel>
                                                 <FormControl>
                                                     <Select onValueChange={field.onChange} defaultValue={form.getValues("noteType")} value={field.value}>
-                                                            <SelectTrigger className="w-full h-10 bg-white">
+                                                            <SelectTrigger className="w-full h-9 sm:h-10 bg-white text-sm sm:text-base">
                                                                 <SelectValue />
                                                             </SelectTrigger>
                                                             <SelectContent>
@@ -307,10 +323,10 @@ export default function NewNotePage(props: { params: Params }) {
                                     name="urgencyLevel"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Nivel de urgencia</FormLabel>
+                                            <FormLabel className="text-sm sm:text-base">Nivel de urgencia</FormLabel>
                                                 <FormControl>
                                                     <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                                            <SelectTrigger className="w-full h-10 bg-white">
+                                                            <SelectTrigger className="w-full h-9 sm:h-10 bg-white text-sm sm:text-base">
                                                                 <SelectValue />
                                                             </SelectTrigger>
                                                             <SelectContent>
@@ -339,31 +355,34 @@ export default function NewNotePage(props: { params: Params }) {
                                     />*/}
                                 </div>
                             </div>
-                            <div className=' flex justify-between'>
-                                <Button type="submit">Guardar nota</Button>                                
-                                <Button type="button" disabled={idParamsForUpdate === 'new'} variant={'destructive'} onClick={handleDelete}>Eliminar nota</Button>
+                            <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
+                                <Button type="submit" className="w-full sm:w-auto text-sm sm:text-base">Guardar nota</Button>                                
+                                <Button type="button" disabled={idParamsForUpdate === 'new'} variant={'destructive'} className="w-full sm:w-auto text-sm sm:text-base" onClick={handleDelete}>Eliminar nota</Button>
                             </div>
                         </form>
                     </Form>
                 </div>
-                <div className="w-1/3 flex gap-3 flex-col border-1 border-gray-300 p-3 rounded-lg max-w-[400px] justify-center items-center">
-                    <h2 className="text-lg font-semibold">Contextos o referencias</h2>
-                    <div className='h-full w-full border-3 border-dashed border-gray-300 max-w-[300px] rounded-lg text-center items-center' {...getRootProps()}>
-                        <input {...getInputProps()} />
-                        {
-                            isDragActive ?
-                            <p>Drop the files here ...</p> :
-                            <p>Drag 'n' drop some files here, or click to select files</p>
-                        }
-                        {fileRejections.length > 0 && (
-                            <div className="text-red-500 mt-2">
-                                {fileRejections.map(({ file }) => (
-                                    <div key={file.name}>
-                                        <p>File "{file.name}" was rejected: only PDF files are allowed.</p>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                {/* Sidebar de contextos - Solo visible en pantallas xl y superiores */}
+                <div className="hidden xl:flex w-1/3 gap-3 flex-col border border-gray-300 p-3 sm:p-4 rounded-lg max-w-[400px] justify-center items-center">
+                    <h2 className="text-base sm:text-lg font-semibold">Contextos o referencias</h2>
+                    <div className='h-full w-full border-2 border-dashed border-gray-300 max-w-full rounded-lg text-center flex items-center justify-center p-4' {...getRootProps()}>
+                        <div>
+                            <input {...getInputProps()} />
+                            {
+                                isDragActive ?
+                                <p className="text-sm sm:text-base">Drop the files here ...</p> :
+                                <p className="text-xs sm:text-sm">Drag 'n' drop some files here, or click to select files</p>
+                            }
+                            {fileRejections.length > 0 && (
+                                <div className="text-red-500 mt-2 text-xs sm:text-sm">
+                                    {fileRejections.map(({ file }) => (
+                                        <div key={file.name}>
+                                            <p>File "{file.name}" was rejected: only PDF files are allowed.</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -13,11 +13,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
     }
     return (
         <SidebarProvider>
-            <div className="flex  w-full">
+            <div className="flex w-full min-h-dvh">
                 <AppSidebar />
                 <div className="flex-1 flex flex-col h-full overflow-hidden">
-                    <SidebarTrigger className="mb-4 flex-shrink-0 p-6" />
-                    <div className="flex-1 px-6 pb-6 overflow-hidden">
+                    <SidebarTrigger className="mb-3 sm:mb-4 flex-shrink-0 p-3 sm:p-4 md:p-5 lg:p-6" />
+                    <div className="flex-1 px-3 sm:px-4 md:px-5 lg:px-6 pb-3 sm:pb-4 md:pb-5 lg:pb-6 overflow-hidden">
                         {children}
                     </div>
                 </div>

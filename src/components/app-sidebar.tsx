@@ -57,19 +57,19 @@ function AppSidebar() {
     return (
             <Sidebar>
                 <SidebarContent className="h-full"> 
-                    <SidebarHeader className="flex flex-row items-center gap-2">
-                        <Image className="w-8 h-8"  width={32} height={32} src="/v1765285713/icono_nota_medica_nezds1.svg"  alt="logo" />
-                        <h3>Medical Notes</h3>
+                    <SidebarHeader className="flex flex-row items-center gap-2 p-3 sm:p-4">
+                        <Image className="w-7 h-7 sm:w-8 sm:h-8"  width={32} height={32} src="/v1765285713/icono_nota_medica_nezds1.svg"  alt="logo" />
+                        <h3 className="text-sm sm:text-base font-semibold">Medical Notes</h3>
                     </SidebarHeader>
                     <SidebarGroup>
-                    <SidebarGroupLabel>Application</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-xs sm:text-sm">Application</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                         {items.map((item) => (
                             <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton asChild>
+                            <SidebarMenuButton asChild className="text-sm sm:text-base">
                                 <Link href={item.url}>
-                                <item.icon />
+                                <item.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                                 <span>{item.title}</span>
                                 </Link>
                             </SidebarMenuButton>
@@ -78,8 +78,8 @@ function AppSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                     </SidebarGroup>
-                    <SidebarFooter className="mt-auto mb-5">
-                        <Button onClick={handleSignOut} className="bg-red-500"><LogOut />Logout</Button>
+                    <SidebarFooter className="mt-auto mb-4 sm:mb-5 px-2 sm:px-3">
+                        <Button onClick={handleSignOut} className="bg-red-500 text-sm sm:text-base w-full"><LogOut className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />Logout</Button>
                     </SidebarFooter>
                 </SidebarContent>
             </Sidebar>
