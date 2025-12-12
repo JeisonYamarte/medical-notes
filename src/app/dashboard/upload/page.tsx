@@ -149,21 +149,21 @@ export default function UploadPage() {
     })
 
     return (
-        <div className='min-h-screen flex gap-10'>
-            <main className='w-2/3'>
-                <h2 className="text-xl font-bold mb-4">Cargar documentos PDF</h2>
-                <div className='flex flex-col items-start w-full min-h-max border-2 border-gray-300  rounded-lg bg-gray-50 p-10 gap-5'>
-                    <div className='flex flex-col justify-center border-3 border-dashed border-gray-300 rounded-lg text-center items-center w-full h-[300px] cursor-pointer' {...getRootProps()}>
+        <div className='min-h-dvh flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 lg:gap-10 p-3 sm:p-4 md:p-5'>
+            <main className='w-full lg:w-2/3'>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">Cargar documentos PDF</h2>
+                <div className='flex flex-col items-start w-full min-h-max border-2 border-gray-300 rounded-lg bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 gap-4 sm:gap-5'>
+                    <div className='flex flex-col justify-center border-2 sm:border-3 border-dashed border-gray-300 rounded-lg text-center items-center w-full h-[200px] sm:h-[250px] md:h-[300px] cursor-pointer' {...getRootProps()}>
                         <input {...getInputProps()} />
-                        <CloudUpload className='mx-auto my-4' size={48} />
+                        <CloudUpload className='mx-auto my-3 sm:my-4' size={36} />
                         { 
                             isDragActive ?
-                            <p>Drop the files here ...</p> :
-                            <p>Drag 'n' drop some files here, or click to select files</p>
+                            <p className="text-sm sm:text-base">Drop the files here ...</p> :
+                            <p className="text-xs sm:text-sm md:text-base px-4">Drag 'n' drop some files here, or click to select files</p>
                         }
                         {
                             fileRejections.length > 0 && (
-                                <div className="text-red-500 mt-2">
+                                <div className="text-red-500 mt-2 text-xs sm:text-sm px-4">
                                     {fileRejections.map(({ file }) => (
                                         <div key={file.name}>
                                             <p>File "{file.name}" was rejected: only PDF files are allowed.</p>
@@ -173,25 +173,26 @@ export default function UploadPage() {
                             )
                         }
                     </div>
-                    <div className='w-full '>
-                        {handlerPdf.length > 0 && <h2>Archivos seleccionados</h2>}
-                        <ul className='h-auto overflow-y-auto mt-10 '>
+                    <div className='w-full'>
+                        {handlerPdf.length > 0 && <h2 className="text-sm sm:text-base font-semibold">Archivos seleccionados</h2>}
+                        <ul className='h-auto overflow-y-auto mt-4 sm:mt-10'>
                             {handlerPdf.map((file) => (
                                 <CardListPDF key={file.name} title={file.name} size={file.size} progressBar={progressBar}/>
                             ))}
                         </ul>
                     </div>
                     { handlerPdf.length > 0 && 
-                        <div className='w-full flex justify-between'>
+                        <div className='w-full flex flex-col sm:flex-row justify-between gap-3 sm:gap-4'>
                             <Button 
                                 variant='destructive'
+                                className="w-full sm:w-auto text-sm sm:text-base"
                                 onClick={() => {
                                     setHandlerPdf([]);
                                 }}
                             >Elminar</Button>
                             <Button 
                                 onClick={(e) => handlePdf(e)} 
-                                className='bg-blue-500' 
+                                className='bg-blue-500 w-full sm:w-auto text-sm sm:text-base' 
                                 disabled={handlerPdf.length === 0 || isUploading}
                             >
                                 {isUploading ? 'Subiendo...' : 'Subir archivo'}
@@ -200,19 +201,19 @@ export default function UploadPage() {
                     }
                 </div>
             </main>
-            <aside className='w-1/3 max-w-sm'>
-                <h2 className="text-xl font-bold mb-4">PDFs subidos</h2>
-                <div className='flex flex-col items-start w-full border-2 border-gray-300  rounded-lg bg-gray-50 cursor-pointer p-3 gap-5 h-[500px] overflow-y-auto'>
+            <aside className='w-full lg:w-1/3 lg:max-w-sm'>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">PDFs subidos</h2>
+                <div className='flex flex-col items-start w-full border-2 border-gray-300 rounded-lg bg-gray-50 cursor-pointer p-3 sm:p-4 gap-3 sm:gap-4 md:gap-5 h-[300px] sm:h-[400px] md:h-[500px] overflow-y-auto'>
                     {isListLoading ? (
                         <div className="flex justify-center items-center w-full h-full">
-                            <div className="relative w-12 h-12 sm:w-16 sm:h-16">
-                                <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-                                <div className="absolute inset-0 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+                            <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16">
+                                <div className="absolute inset-0 border-3 sm:border-4 border-blue-200 rounded-full"></div>
+                                <div className="absolute inset-0 border-3 sm:border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
                             </div>
                         </div>
                     ) : (
                         files.length === 0 ? (
-                            <p className='text-gray-500'>No hay PDFs subidos.</p>
+                            <p className='text-gray-500 text-sm sm:text-base'>No hay PDFs subidos.</p>
                         ) :
                         files.map((file) => (
                             <CardPDFsUpload 
@@ -231,26 +232,26 @@ export default function UploadPage() {
                 </div>
             </aside>
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                <DialogContent>
+                <DialogContent className="max-w-[90vw] sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Detalles del PDF</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="text-lg sm:text-xl">Detalles del PDF</DialogTitle>
+                        <DialogDescription className="text-sm sm:text-base">
                             Información del PDF seleccionado.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="mt-4">
-                        <p><strong>Nombre del archivo:</strong> {selectedPdf?.fileName}</p>
-                        <p><strong>Nombre original:</strong> {selectedPdf?.originalName}</p>
+                    <div className="mt-3 sm:mt-4 space-y-2 text-sm sm:text-base">
+                        <p><strong>Nombre del archivo:</strong> <span className="break-all">{selectedPdf?.fileName}</span></p>
+                        <p><strong>Nombre original:</strong> <span className="break-all">{selectedPdf?.originalName}</span></p>
                         <p><strong>Tamaño del archivo:</strong> {selectedPdf ? (selectedPdf.fileSize / 1024).toFixed(2) + ' KB' : ''}</p>
                         <p><strong>Fecha de creación:</strong> {selectedPdf?.createdAt ? new Date(selectedPdf.createdAt).toLocaleString() : ''}</p>
                     </div>
-                    <div className='flex justify-between px-10'>
-                        <Button className='bg-blue-500' onClick={downloadPDF}>Descargar<Download /></Button>
-                        <Button variant={'destructive'} onClick={handleDelete}>Eliminar {isDeleting ? <Spinner /> : <Trash2 />}</Button>
+                    <div className='flex flex-col sm:flex-row justify-between gap-3 px-0 sm:px-10'>
+                        <Button className='bg-blue-500 w-full sm:w-auto text-sm sm:text-base' onClick={downloadPDF}>Descargar<Download className="ml-2" /></Button>
+                        <Button variant={'destructive'} className="w-full sm:w-auto text-sm sm:text-base" onClick={handleDelete}>Eliminar {isDeleting ? <Spinner className="ml-2" /> : <Trash2 className="ml-2" />}</Button>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button disabled={isDeleting} >Close</Button>
+                            <Button disabled={isDeleting} className="w-full sm:w-auto text-sm sm:text-base">Close</Button>
                         </DialogClose>
                     </DialogFooter>
                 </DialogContent>
