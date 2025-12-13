@@ -1,14 +1,17 @@
 "use server";
 import { generateText } from 'ai';
 import { google } from '../lib/gemini';
-import { searchChroma } from './chromaservice';
+import { searchChroma } from './chromaService';
 import type { QueryResult } from 'chromadb';
 
 
 async function generatePrediction(userInput: string, documents: (string | null)[][] = [] ) {
     
     const { text } = await generateText({
-        model: google('gemini-2.5-pro'), // o el modelo que uses
+        model: google('gemini-2.0-flash-lite'), // o el modelo que uses
+        temperature: 0.2,
+        topP: 0.9,
+        maxOutputTokens: 30,
         messages: [
             {
                 role: 'system',
@@ -49,7 +52,7 @@ export async function getContextualPrediction(userInput: string) {
     
     const documents: (string | null)[][] = searchResults.documents 
 
-    const response = await generatePrediction(textForPrediction);
+    const response = await generatePrediction(textForPrediction, documents);
 
     const cleanResponde = response.slice(response.indexOf('#') + 1, response.lastIndexOf('#')).trim();
     

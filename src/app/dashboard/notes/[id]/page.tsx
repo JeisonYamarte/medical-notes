@@ -176,14 +176,12 @@ export default function NewNotePage(props: { params: Params }) {
         debounceTimer.current = setTimeout(() => {
             setIsPredicting(true);
             const sizeWindows = window.innerWidth;
-            console.log('sizeWindows', sizeWindows);
             onSubmit();
             const predict = getContextualPrediction(text) //useCompletions (libreria) podriia mejorar esto, incluso con el stop()
             .then((res) => {
                 setPrediction(res);
                 setIsPredicting(false);
                 
-                console.log('sizeWindows', sizeWindows);
                 if (sizeWindows < 780) {
                     toast.message(' Press the text to add.');
                 } else {

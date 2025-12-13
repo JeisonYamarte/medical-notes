@@ -28,11 +28,13 @@ export async function searchChroma(text:string): Promise<QueryResult> {
 
     const results: QueryResult = await collection.query({
         queryTexts: [query],
-        nResults: 3,
+        nResults: 2,
         where:{
             'user_id': userId
         }
     })
+
+    console.log('ChromaDB search results:', results.distances);
     
     return results;
 }

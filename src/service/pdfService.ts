@@ -7,9 +7,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../lib/auth';
 import Pdf  from '@/model/pdf';
 import { connectDB } from "@/lib/mongodb";
-import { addToChroma } from './chromaservice';
+import { addToChroma } from './chromaService';
 import { deletePDF } from './cloudinaryService';
-import { deleteChromaByFileId } from './chromaservice';
+import { deleteChromaByFileId } from './chromaService';
 
 
 // Saves PDF metadata to the database associated with the current user
