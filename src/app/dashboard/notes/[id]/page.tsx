@@ -46,7 +46,7 @@ export default function NewNotePage(props: { params: Params }) {
     const editorRef = React.useRef<HTMLTextAreaElement | null>(null);
 
     const [userInput, setUserInput] = React.useState<string>('');
-    const [prediction, setPrediction] = React.useState<string | null>(null);
+    const [prediction, setPrediction] = React.useState<string>('');
     const [idParamsForUpdate, setIdParamsForUpdate] = React.useState<string>(idParams);
     const [isPredicting, setIsPredicting] = React.useState<boolean>(false);
 
@@ -82,11 +82,6 @@ export default function NewNotePage(props: { params: Params }) {
             });
         }
     }, []);
-
-    
-
-    
-    
 
     const onSubmit = () => {
         const data: NoteType = form.getValues();
@@ -177,9 +172,9 @@ export default function NewNotePage(props: { params: Params }) {
             clearTimeout(debounceTimer.current);
         }
         
-        setIsPredicting(true);
-
+        
         debounceTimer.current = setTimeout(() => {
+            setIsPredicting(true);
             const sizeWindows = window.innerWidth;
             console.log('sizeWindows', sizeWindows);
             onSubmit();
@@ -203,7 +198,7 @@ export default function NewNotePage(props: { params: Params }) {
         if (!prediction) return;
 
         form.setValue("content", form.getValues("content") + prediction);  
-        setPrediction(null);
+        setPrediction('');
         editorRef.current?.focus();
     }
 
@@ -211,7 +206,7 @@ export default function NewNotePage(props: { params: Params }) {
         if(e.key === 'Tab' && prediction) {
             e.preventDefault();
             form.setValue("content", form.getValues("content") + prediction);
-            setPrediction(null);
+            setPrediction('');
         }
     }
 
@@ -265,7 +260,6 @@ export default function NewNotePage(props: { params: Params }) {
                                         )}
                                     />
                                     {
-                                        prediction && 
                                         <div className="absolute pointer-events-none z-10 top-0 inset-0 w-full h-[300px] sm:h-[350px] md:h-[400px] p-2 sm:p-3 border border-gray-300 rounded-md ring-1 ring-gray-500 text-black/70 text-base sm:text-lg md:text-xl font-medium">
                                             <span className='opacity-0'>{userInput}</span>
                                             {isPredicting ?
