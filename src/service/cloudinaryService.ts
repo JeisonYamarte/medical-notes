@@ -39,12 +39,10 @@ export async function uploadPDF(file: FormData) {
 
 export async function deletePDF(publicId: string ) {
     try{
-        console.log('Deleting from Cloudinary, publicId:', publicId);
         const resetId = 'my-medical-note/' + publicId;
         const result = await cloudinary.uploader.destroy(resetId, {
             resource_type: 'raw'
         });
-        console.log('Cloudinary deletion result:', result);
         return { status: 200, message: 'Deletion successful', result };
     } catch (error) {
         return { status: 500, message: 'Deletion failed', error };

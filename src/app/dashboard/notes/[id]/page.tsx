@@ -95,7 +95,6 @@ export default function NewNotePage(props: { params: Params }) {
             }).then(async (response) => {
                 if (response.ok) {
                     const resData = await response.json();
-                    console.log('Note created successfully:', resData);
                     setIdParamsForUpdate(resData.data._id);
                     toast.success('Note created successfully');
 
@@ -186,7 +185,6 @@ export default function NewNotePage(props: { params: Params }) {
                     toast.message(' Press the text to add.');
                 } else {
                     toast.message(' Press TAB to accept the prediction.');
-                    console.log('sizeWindows', sizeWindows);
                 }
             });
         }, 2000);

@@ -29,6 +29,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 export default function SignUp() {
+    const router = useRouter();
 
     const form = useForm<SignUpType>({
         resolver: zodResolver(signUpSchema),
@@ -42,7 +43,6 @@ export default function SignUp() {
     })
 
     const onSubmit = (data: SignUpType) => {
-        console.log('Formulario Enviado',data);
         const newUser = {
             name: data.name,
             email: data.email,
@@ -59,15 +59,16 @@ export default function SignUp() {
         .then(response => response.json())
         .then(async result => {
             if (result.success) {
-                console.log('Usuario creado exitosamente:', result.data);
                 const res = await signIn("credentials", {
                     email: data.email,
                     password: data.password,
                     redirect: false,
                 })
+                if (res && !res.error) {
+                    router.push('/dashboard');
+                }
                 
             } else {
-                console.error('Error creando el usuario:', result.error);
                 if (result.error === 409) {
                     form.setError("email", { type: "manual", message: "El correo electrónico ya está en uso." });
                 }

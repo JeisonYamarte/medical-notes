@@ -34,7 +34,7 @@ export async function searchChroma(text:string): Promise<QueryResult> {
         }
     })
 
-    console.log('ChromaDB search results:', results.distances);
+    //console.log('ChromaDB search results:', results.distances); implement logic future
     
     return results;
 }
@@ -62,8 +62,6 @@ export async function addToChroma(chunks: string[], fileId: string) {
 
     } catch (error) {
         console.error('Error saving embeddings:', error);
-    } finally {
-        console.log('Embeddings process completed.');
     }
 }
 
