@@ -46,7 +46,6 @@ export default function SignIn() {
     })
 
     const onSubmit = async (data: FormData) => {
-        console.log('Formulario Enviado',data);
         const res = await signIn("credentials", {
             email: data.email,
             password: data.password,

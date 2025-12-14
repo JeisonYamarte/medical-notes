@@ -25,7 +25,7 @@ export async function connectDB() {
     const conn = await mongoose.connect(MONGODB_URI!);
     
     } catch (error) {
-        console.error('❌ Error conectando a MongoDB:', error);
+        console.error('Error conectando a MongoDB:', error);
         throw error;
     }
 }
@@ -34,10 +34,10 @@ export async function disconnectDB() {
     try {
         if (mongoose.connection.readyState !== 0) {
             await mongoose.connection.close();
-            console.log('✅ Conexión a MongoDB cerrada');
+            console.log('Conexión a MongoDB cerrada');
         }
     } catch (error) {
-        console.error('❌ Error cerrando la conexión a MongoDB:', error);
+        console.error('Error cerrando la conexión a MongoDB:', error);
         throw error;
     }
 }
