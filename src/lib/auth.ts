@@ -7,6 +7,10 @@ import User from "@/model/user";
 import client from "./mongoClient";
 import { MongoDBAdapter } from "@auth/mongodb-adapter"
 
+function normalizeEmail(email?: string | null) {
+    return email?.trim().toLowerCase() || null;
+}
+
 export const authOptions: NextAuthOptions = {
     adapter: MongoDBAdapter(client),
     providers: [
@@ -21,7 +25,8 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Faltan las credenciales");
 
             await connectDB();
-            const user = await User.findOne({ email: credentials.email });
+            const email = normalizeEmail(credentials.email);
+            const user = await User.findOne({ email });
 
             if (!user) throw new Error("Usuario no encontrado");
 
@@ -55,14 +60,32 @@ export const authOptions: NextAuthOptions = {
     },
 
     callbacks: {
-        async jwt({ token, user, account }) {
+        async signIn({ account, profile }) {
+            if (account?.provider !== "google") {
+                return true;
+            }
+
+            const email = normalizeEmail((profile as { email?: string | null } | null)?.email);
+            if (!email) {
+                return false;
+            }
+
+            await connectDB();
+            const dbUser = await User.findOne({ email });
+
+            return Boolean(dbUser);
+        },
+
+        async jwt({ token, user }) {
             if (user) {
             token.id = user.id;
             }
 
-            if (account?.provider === "google" && !token.id) {
+            const email = normalizeEmail(token.email);
+
+            if (email) {
             await connectDB();
-            const dbUser = await User.findOne({ email: token.email });
+            const dbUser = await User.findOne({ email });
             if (dbUser) token.id = dbUser._id.toString();
             }
 

@@ -2,12 +2,12 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Lock } from "lucide-react";
+import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-import { signUpSchema, SignUpType } from '@/lib/schemas/authScchema';
+import { signUpSchema, SignUpType } from '@/lib/schemas/authSchema';
 import {
     Card,
     CardAction,
@@ -83,23 +83,23 @@ export default function SignUp() {
 
     return (
         <>
-            <Card className="w-full max-w-[360px] sm:max-w-[400px] md:max-w-[420px] h-auto flex flex-col gap-6 sm:gap-8 md:gap-10 py-6 sm:py-8 md:py-10 mx-4">
+            <Card className="z-10 mx-4 flex h-auto w-full max-w-md flex-col gap-8 border-border/80 bg-card/95 py-8 shadow-xl">
                 <CardHeader className="flex flex-col items-center justify-center gap-2">
-                    <CardTitle className="text-xl sm:text-2xl font-bold text-center">Crea tu cuenta</CardTitle>
-                    <CardDescription className="text-sm sm:text-base text-center">Únete a Medical Notes para gestionar tus registros médicos de forma eficiente.</CardDescription>
+                    <CardTitle className="text-center text-2xl font-bold tracking-tight">Crea tu cuenta</CardTitle>
+                    <CardDescription className="text-center text-sm text-muted-foreground">Unete a Medical Notes para gestionar tus registros medicos de forma eficiente.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col gap-3 sm:gap-4">
+                <CardContent className="flex flex-col gap-4">
                     <Form {...form}>
-                        <form id="formSignUp" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-3 sm:gap-4">
+                        <form id="formSignUp" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
                             <FormField
                                 control={form.control}
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel htmlFor="name" className="text-sm sm:text-base">Nombre</FormLabel>
+                                        <FormLabel htmlFor="name" className="text-sm">Nombre</FormLabel>
                                         <FormControl>
                                             <Input
-                                                className="text-sm sm:text-base"
+                                                className="h-11 border-border/80 bg-background text-sm"
                                                 id="name"
                                                 type="text"
                                                 placeholder="Tu nombre completo"
@@ -115,12 +115,12 @@ export default function SignUp() {
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel htmlFor="email" className="text-sm sm:text-base">Email</FormLabel>
+                                        <FormLabel htmlFor="email" className="text-sm">Email</FormLabel>
                                         <div className="relative w-full">
-                                            <Mail className="absolute scale-75 sm:scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
+                                            <EnvelopeIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                             <FormControl>
                                                 <Input
-                                                    className="pl-9 sm:pl-10 pr-3 py-2 text-sm sm:text-base"
+                                                    className="h-11 border-border/80 bg-background pl-10 pr-3 text-sm"
                                                     id="email"
                                                     type="email"
                                                     placeholder="m@example.com"
@@ -137,12 +137,12 @@ export default function SignUp() {
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel htmlFor="password" className="text-sm sm:text-base">Password</FormLabel>
+                                        <FormLabel htmlFor="password" className="text-sm">Password</FormLabel>
                                         <div className="relative w-full">
-                                            <Lock className="absolute scale-75 sm:scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
+                                            <LockClosedIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                             <FormControl>
                                                 <Input
-                                                    className="pl-9 sm:pl-10 pr-3 py-2 text-sm sm:text-base"
+                                                    className="h-11 border-border/80 bg-background pl-10 pr-3 text-sm"
                                                     id="password"
                                                     type="password"
                                                     placeholder="Password"
@@ -159,12 +159,12 @@ export default function SignUp() {
                                 name="confirmPassword"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel htmlFor="confirmPassword" className="text-sm sm:text-base">Confirm Password</FormLabel>
+                                        <FormLabel htmlFor="confirmPassword" className="text-sm">Confirm Password</FormLabel>
                                         <div className="relative w-full">
-                                            <Lock className="absolute scale-75 sm:scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
+                                            <LockClosedIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                             <FormControl>
                                                 <Input
-                                                    className="pl-9 sm:pl-10 pr-3 py-2 text-sm sm:text-base"
+                                                    className="h-11 border-border/80 bg-background pl-10 pr-3 text-sm"
                                                     id="confirmPassword"
                                                     type="password"
                                                     placeholder="Confirm password"
@@ -181,10 +181,10 @@ export default function SignUp() {
                                 name="birthday"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel htmlFor="birthday" className="text-sm sm:text-base">Fecha de nacimiento</FormLabel>
+                                        <FormLabel htmlFor="birthday" className="text-sm">Fecha de nacimiento</FormLabel>
                                         <FormControl>
                                             <Input
-                                                className="text-sm sm:text-base"
+                                                className="h-11 border-border/80 bg-background text-sm"
                                                 id="birthday"
                                                 type="date"
                                                 {...field}
@@ -197,9 +197,9 @@ export default function SignUp() {
                         </form>
                     </Form>
                 </CardContent>
-                <CardFooter className="flex flex-col gap-3 sm:gap-4 justify-center items-center">
-                    <Button type="submit" form="formSignUp" className="bg-blue-500 w-full text-sm sm:text-base">create account</Button>
-                    <CardAction className="w-auto mx-auto font-semibold text-xs sm:text-sm">¿Ya tienes una cuenta? <Link className="text-blue-500" href="/sign-in">Iniciar Sesion</Link></CardAction>
+                <CardFooter className="flex flex-col items-center justify-center gap-4">
+                    <Button type="submit" form="formSignUp" className="h-11 w-full text-sm">Crear cuenta</Button>
+                    <CardAction className="mx-auto w-auto text-xs font-semibold">Ya tienes una cuenta? <Link className="text-primary" href="/sign-in">Iniciar sesion</Link></CardAction>
                 </CardFooter>
             </Card>
         </>

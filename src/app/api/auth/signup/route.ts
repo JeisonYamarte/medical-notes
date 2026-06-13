@@ -8,13 +8,14 @@ export async function POST(request: NextRequest ) {
     try{
 
         const { data, error } = await validateRequest<UserType>(request, userSchema);
-        await connectDB();
 
         if (error || !data) {
             return error;
         }
 
-        const existingUser = await User.findOne({ email: data.email.toLowerCase() });
+        await connectDB();
+
+        const existingUser = await User.findOne({ email: data.email });
         if (existingUser) {
             return NextResponse.json(
                 {
@@ -37,12 +38,13 @@ export async function POST(request: NextRequest ) {
             },
             { status: 201 }
         );
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error en POST /api/users:', error);
+        const message = error instanceof Error ? error.message : 'Error al crear usuario';
         return NextResponse.json(
             {
                 success: false,
-                error: error.message || 'Error al crear usuario',
+                error: message,
             },
             { status: 500 }
         );

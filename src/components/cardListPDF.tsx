@@ -1,14 +1,14 @@
-import { FileText, X } from "lucide-react";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { Progress } from "@/components/ui/progress"
 
 function CardListPDF({title, size, progressBar}: { title: string; size: number; progressBar: number }) {
     return (
-        <li className="flex items-center justify-between p-4 border-2 border-gray-200 h-30 rounded-lg mb-2 w-full">
-            <FileText className="m-2 h-10 w-10 text-blue-500" />
+        <li className="mb-2 flex w-full items-center justify-between rounded-lg border border-border bg-card p-4 shadow-sm">
+            <DocumentTextIcon className="m-2 h-9 w-9 text-primary" />
             <div className="flex flex-col items-start w-full">
-                <span>{title}</span>
-                <span>{size / 1024} KB</span>
-                <Progress className="w-full mt-2 [&>div]:bg-blue-500" value={progressBar} />
+                <span className="line-clamp-1 font-medium text-card-foreground">{title}</span>
+                <span className="text-sm text-muted-foreground">{(size / 1024).toFixed(2)} KB</span>
+                <Progress className="mt-2 w-full [&>div]:bg-primary" value={progressBar} />
             </div>
         </li>
     );

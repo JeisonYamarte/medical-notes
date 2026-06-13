@@ -1,6 +1,4 @@
 "use server"
-import { NextResponse } from 'next/server';
-
 import { extractText } from 'unpdf';
 import { type PdfUploadType } from '../lib/schemas/pdfSchema';
 import { getServerSession } from 'next-auth';
@@ -10,6 +8,15 @@ import { connectDB } from "@/lib/mongodb";
 import { addToChroma } from './chromaService';
 import { deletePDF } from './cloudinaryService';
 import { deleteChromaByFileId } from './chromaService';
+
+export interface PdfListItem {
+    id: string;
+    fileName: string;
+    originalName: string;
+    fileUrl: string;
+    fileSize: number;
+    createdAt: Date;
+}
 
 
 // Saves PDF metadata to the database associated with the current user
@@ -33,41 +40,36 @@ export async function savePdfMetadata(data: PdfUploadType) {
     return { status: 200, message: 'Metadata saved successfully', pdfId };
 }
 
-export async function saveEmbebingText(FormData: FormData, pdfId: string) {
+export async function saveEmbeddingText(FormData: FormData, pdfId: string) {
     const extractResult = await extractTextFromPdf(FormData);
 
     if(extractResult.status !== 200 || !extractResult.text) {
         throw new Error('Text extraction failed');
     }
-    const cleanText = extractResult.text.join(" ")         // une todo el array en un solo string
-            .replace(/\+/g, " ")            // reemplaza los + por espacios
-            .replace(/\\n|\\r|\n|\r/g, " ") // elimina saltos de línea visibles o reales
-            .replace(/\\?x[0-9A-Fa-f]{2}/g, " ") // quita secuencias tipo x86, x20, etc.
-            .replace(/\u0083/g, " ")      // elimina caracteres Unicode no deseados
-            .replace(/\s+/g, " ")           // reduce múltiples espacios a uno solo
-            .trim();                        // elimina espacios del inicio y final
 
-            
-        const chunks = splitTextByWords(cleanText);
+    const cleanText = extractResult.text.join(" ")
+            .replace(/\+/g, " ")
+            .replace(/\\n|\\r|\n|\r/g, " ")
+            .replace(/\\?x[0-9A-Fa-f]{2}/g, " ")
+            .replace(/\u0083/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
 
-        await addToChroma(chunks, pdfId);
+    const chunks = splitTextByWords(cleanText);
+
+    await addToChroma(chunks, pdfId);
+
+    await Pdf.findByIdAndUpdate(pdfId, { isProcessed: true });
 }
 
 
 // Retrieves the list of PDFs uploaded by the current authenticated user
-export async function getPdfList() {
-
-    
-    const session = await getServerSession(authOptions);
-    if (!session) {
-        throw new Error('Unauthorized');
-    }
-
+export async function getPdfList(userId: string) {
     await connectDB();
 
-    const pdfList = await Pdf.find({ uploadedBy: session.user.id }, { __v: 0, uploadedBy: 0}).sort({ createdAt: -1 });
+    const pdfList = await Pdf.find({ uploadedBy: userId }, { __v: 0, uploadedBy: 0}).sort({ createdAt: -1 });
 
-    const formattedList = pdfList.map(pdf => ({
+    const formattedList: PdfListItem[] = pdfList.map(pdf => ({
         id: pdf.id.toString(),
         fileName: pdf.fileName,
         originalName: pdf.originalName,
@@ -76,14 +78,19 @@ export async function getPdfList() {
         createdAt: pdf.createdAt,
     }));
 
-    return NextResponse.json({ success: true, data: formattedList });
+    return formattedList;
 }
 
 export async function deletePdfById(pdfId: string) {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
+            return { status: 401, message: 'Unauthorized' };
+        }
+
         await connectDB();
 
-        const pdf = await Pdf.findById(pdfId);
+        const pdf = await Pdf.findOne({ _id: pdfId, uploadedBy: session.user.id });
 
         if (!pdf) {
             console.error('PDF not found:', pdfId);

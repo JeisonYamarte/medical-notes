@@ -1,4 +1,3 @@
-import { chromaDbClient } from "@/lib/chromadb";
 import type { QueryResult } from "chromadb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -62,6 +61,7 @@ export async function addToChroma(chunks: string[], fileId: string) {
 
     } catch (error) {
         console.error('Error saving embeddings:', error);
+        throw error;
     }
 }
 

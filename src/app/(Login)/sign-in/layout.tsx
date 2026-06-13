@@ -10,7 +10,9 @@ export default async function SignInLayout({ children }: { children: React.React
     }
     
     return (
-        <div className="flex min-h-dvh flex-col items-center justify-center p-4 sm:p-6 md:p-12 lg:p-16 xl:p-24">
+        <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4 py-10 sm:px-6 md:px-12 lg:px-16 xl:px-24">
+            <div className="pointer-events-none absolute -left-10 top-6 h-56 w-56 rounded-full bg-secondary/35 blur-3xl" />
+            <div className="pointer-events-none absolute -right-14 bottom-4 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
             {children}
         </div>
     );
