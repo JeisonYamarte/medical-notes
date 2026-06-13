@@ -1,4 +1,4 @@
-"use server";
+import 'server-only';
 import { cloudinary } from "@/lib/cloudinaryConfig";
 
 // Uploads a PDF file to Cloudinary and returns the secure URL
