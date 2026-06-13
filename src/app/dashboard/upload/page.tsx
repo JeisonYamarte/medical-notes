@@ -2,10 +2,10 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import {useDropzone} from 'react-dropzone'
 import { 
-    CloudUpload,
-    Trash2,
-    Download
-    } from 'lucide-react'
+    ArrowDownTrayIcon,
+    CloudArrowUpIcon,
+    TrashIcon,
+    } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/ui/button'
 import { Spinner } from "@/components/ui/spinner"
@@ -24,7 +24,7 @@ import { CardListPDF } from '@/components/cardListPDF'
 import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
 import {
     savePdfMetadata, 
-    saveEmbebingText,
+    saveEmbeddingText,
     deletePdfById
 } from '@/service/pdfService'
 import { uploadPDF } from '@/service/cloudinaryService'
@@ -89,7 +89,7 @@ export default function UploadPage() {
             .then((result) => {
                 setProgressBar(90);
                 if(result && result.status === 200 && result.pdfId) {
-                    return saveEmbebingText(formData, result.pdfId);
+                    return saveEmbeddingText(formData, result.pdfId);
                 }
             })
             .then(() => {
@@ -139,7 +139,6 @@ export default function UploadPage() {
         getRootProps, 
         getInputProps, 
         isDragActive, 
-        acceptedFiles,
         fileRejections,
     } = useDropzone({
         accept: {
@@ -149,24 +148,24 @@ export default function UploadPage() {
     })
 
     return (
-        <div className='min-h-dvh flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 lg:gap-10 p-3 sm:p-4 md:p-5'>
-            <main className='w-full lg:w-2/3'>
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">Cargar documentos PDF</h2>
-                <div className='flex flex-col items-start w-full min-h-max border-2 border-gray-300 rounded-lg bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 gap-4 sm:gap-5'>
-                    <div className='flex flex-col justify-center border-2 sm:border-3 border-dashed border-gray-300 rounded-lg text-center items-center w-full h-[200px] sm:h-[250px] md:h-[300px] cursor-pointer' {...getRootProps()}>
+        <div className='min-h-dvh grid grid-cols-1 gap-4 p-3 md:grid-cols-3 md:gap-6 md:p-5'>
+            <main className='md:col-span-2'>
+                <h2 className="mb-4 text-2xl font-bold tracking-tight">Cargar documentos PDF</h2>
+                <div className='flex min-h-max w-full flex-col items-start gap-5 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6 md:p-8'>
+                    <div className='flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-primary/40 bg-secondary/20 text-center' {...getRootProps()}>
                         <input {...getInputProps()} />
-                        <CloudUpload className='mx-auto my-3 sm:my-4' size={36} />
+                        <CloudArrowUpIcon className='mx-auto my-4 h-10 w-10 text-primary' />
                         { 
                             isDragActive ?
-                            <p className="text-sm sm:text-base">Drop the files here ...</p> :
-                            <p className="text-xs sm:text-sm md:text-base px-4">Drag 'n' drop some files here, or click to select files</p>
+                            <p className="text-sm sm:text-base">Suelta el archivo aqui...</p> :
+                            <p className="px-4 text-sm text-muted-foreground md:text-base">Arrastra tu PDF o haz clic para seleccionarlo.</p>
                         }
                         {
                             fileRejections.length > 0 && (
-                                <div className="text-red-500 mt-2 text-xs sm:text-sm px-4">
+                                <div className="mt-2 px-4 text-xs text-destructive sm:text-sm">
                                     {fileRejections.map(({ file }) => (
                                         <div key={file.name}>
-                                            <p>File "{file.name}" was rejected: only PDF files are allowed.</p>
+                                            <p>{`El archivo "${file.name}" fue rechazado: solo se permiten PDFs.`}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -174,25 +173,25 @@ export default function UploadPage() {
                         }
                     </div>
                     <div className='w-full'>
-                        {handlerPdf.length > 0 && <h2 className="text-sm sm:text-base font-semibold">Archivos seleccionados</h2>}
-                        <ul className='h-auto overflow-y-auto mt-4 sm:mt-10'>
+                        {handlerPdf.length > 0 && <h2 className="text-sm font-semibold">Archivos seleccionados</h2>}
+                        <ul className='mt-4 h-auto overflow-y-auto'>
                             {handlerPdf.map((file) => (
                                 <CardListPDF key={file.name} title={file.name} size={file.size} progressBar={progressBar}/>
                             ))}
                         </ul>
                     </div>
                     { handlerPdf.length > 0 && 
-                        <div className='w-full flex flex-col sm:flex-row justify-between gap-3 sm:gap-4'>
+                        <div className='flex w-full flex-col justify-between gap-3 sm:flex-row sm:gap-4'>
                             <Button 
                                 variant='destructive'
-                                className="w-full sm:w-auto text-sm sm:text-base"
+                                className="h-11 w-full text-sm sm:w-auto"
                                 onClick={() => {
                                     setHandlerPdf([]);
                                 }}
-                            >Elminar</Button>
+                            >Eliminar</Button>
                             <Button 
                                 onClick={(e) => handlePdf(e)} 
-                                className='bg-blue-500 w-full sm:w-auto text-sm sm:text-base' 
+                                className='h-11 w-full text-sm sm:w-auto' 
                                 disabled={handlerPdf.length === 0 || isUploading}
                             >
                                 {isUploading ? 'Subiendo...' : 'Subir archivo'}
@@ -201,19 +200,19 @@ export default function UploadPage() {
                     }
                 </div>
             </main>
-            <aside className='w-full lg:w-1/3 lg:max-w-sm'>
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">PDFs subidos</h2>
-                <div className='flex flex-col items-start w-full border-2 border-gray-300 rounded-lg bg-gray-50 cursor-pointer p-3 sm:p-4 gap-3 sm:gap-4 md:gap-5 h-[300px] sm:h-[400px] md:h-[500px] overflow-y-auto'>
+            <aside className='w-full md:col-span-1'>
+                <h2 className="mb-4 text-2xl font-bold tracking-tight">PDFs subidos</h2>
+                <div className='flex h-[520px] w-full cursor-pointer flex-col items-start gap-3 overflow-y-auto rounded-2xl border border-border bg-card p-4 shadow-sm'>
                     {isListLoading ? (
                         <div className="flex justify-center items-center w-full h-full">
-                            <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16">
-                                <div className="absolute inset-0 border-3 sm:border-4 border-blue-200 rounded-full"></div>
-                                <div className="absolute inset-0 border-3 sm:border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+                            <div className="relative h-12 w-12">
+                                <div className="absolute inset-0 rounded-full border-4 border-primary/20"></div>
+                                <div className="absolute inset-0 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
                             </div>
                         </div>
                     ) : (
                         files.length === 0 ? (
-                            <p className='text-gray-500 text-sm sm:text-base'>No hay PDFs subidos.</p>
+                            <p className='text-sm text-muted-foreground'>No hay PDFs subidos.</p>
                         ) :
                         files.map((file) => (
                             <CardPDFsUpload 
@@ -245,13 +244,13 @@ export default function UploadPage() {
                         <p><strong>Tamaño del archivo:</strong> {selectedPdf ? (selectedPdf.fileSize / 1024).toFixed(2) + ' KB' : ''}</p>
                         <p><strong>Fecha de creación:</strong> {selectedPdf?.createdAt ? new Date(selectedPdf.createdAt).toLocaleString() : ''}</p>
                     </div>
-                    <div className='flex flex-col sm:flex-row justify-between gap-3 px-0 sm:px-10'>
-                        <Button className='bg-blue-500 w-full sm:w-auto text-sm sm:text-base' onClick={downloadPDF}>Descargar<Download className="ml-2" /></Button>
-                        <Button variant={'destructive'} className="w-full sm:w-auto text-sm sm:text-base" onClick={handleDelete}>Eliminar {isDeleting ? <Spinner className="ml-2" /> : <Trash2 className="ml-2" />}</Button>
+                    <div className='flex flex-col justify-between gap-3 px-0 sm:flex-row sm:px-10'>
+                        <Button className='h-10 w-full text-sm sm:w-auto' onClick={downloadPDF}>Descargar<ArrowDownTrayIcon className="ml-2 h-4 w-4" /></Button>
+                        <Button variant={'destructive'} className="h-10 w-full text-sm sm:w-auto" onClick={handleDelete}>Eliminar {isDeleting ? <Spinner className="ml-2" /> : <TrashIcon className="ml-2 h-4 w-4" />}</Button>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button disabled={isDeleting} className="w-full sm:w-auto text-sm sm:text-base">Close</Button>
+                            <Button disabled={isDeleting} variant="outline" className="h-10 w-full text-sm sm:w-auto">Cerrar</Button>
                         </DialogClose>
                     </DialogFooter>
                 </DialogContent>

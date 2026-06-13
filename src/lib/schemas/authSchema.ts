@@ -16,4 +16,3 @@ export const signInSchema = userSchema.pick({
 })
 
 export type SignInType = z.infer<typeof signInSchema>;
-

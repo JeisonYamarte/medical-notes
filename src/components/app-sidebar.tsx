@@ -12,7 +12,13 @@ import {
     SidebarGroupLabel
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import { HomeIcon, FileText, CloudUpload, LogOut} from "lucide-react";
+import {
+    ArrowRightOnRectangleIcon,
+    CloudArrowUpIcon,
+    DocumentTextIcon,
+    HomeIcon,
+    PlusCircleIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -29,17 +35,17 @@ const items = [
         {
         title: 'Note list',
         url: '/dashboard/notes',
-        icon: FileText
+        icon: DocumentTextIcon
     },
         {
         title: 'Create new note',
         url: '/dashboard/notes/new',
-        icon: FileText
+        icon: PlusCircleIcon
     },
     {
         title: 'Upload PDF',
         url: '/dashboard/upload',
-        icon: CloudUpload
+        icon: CloudArrowUpIcon
     },
 ]
 
@@ -79,7 +85,7 @@ function AppSidebar() {
                     </SidebarGroupContent>
                     </SidebarGroup>
                     <SidebarFooter className="mt-auto mb-4 sm:mb-5 px-2 sm:px-3">
-                        <Button onClick={handleSignOut} className="bg-red-500 text-sm sm:text-base w-full"><LogOut className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />Logout</Button>
+                        <Button onClick={handleSignOut} variant="destructive" className="text-sm sm:text-base w-full"><ArrowRightOnRectangleIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />Logout</Button>
                     </SidebarFooter>
                 </SidebarContent>
             </Sidebar>

@@ -34,25 +34,39 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination"
-import { Search, 
-    PlusCircle, 
-    Calendar as CalendarIcon, 
-    ArrowUpNarrowWide,
-    RefreshCw
-} from "lucide-react";
+import {
+    ArrowsUpDownIcon,
+    CalendarDaysIcon,
+    MagnifyingGlassIcon,
+    PlusCircleIcon,
+    ArrowPathIcon,
+} from "@heroicons/react/24/outline";
 
 import { UrgencyLevelEnum } from "@/lib/schemas/noteSchema";
 import { INote } from "@/model/note";
-import { tr } from "zod/v4/locales";
 
-const initialState = { 
+type NotesState = {
+    date: Date | null;
+    title: string | null;
+    urgency: string | null;
+    skip: number;
+};
+
+const initialState: NotesState = {
     date: null,
     title: null,
     urgency: null,
     skip: 1
 }
 
-function reducer(state: typeof initialState, action: any) {
+type NotesAction =
+    | { type: 'SET_TITLE'; payload: string }
+    | { type: 'SET_URGENCY'; payload: string }
+    | { type: 'SET_SKIP'; payload: number }
+    | { type: 'SET_DATE'; payload: Date | null }
+    | { type: 'RESET' };
+
+function reducer(state: NotesState, action: NotesAction): NotesState {
     switch (action.type) {
         case 'SET_TITLE':
             return { ...state, title: action.payload };
@@ -71,7 +85,7 @@ function reducer(state: typeof initialState, action: any) {
 
 export default function NotesPage() {
     //state for find in DB
-    const [state, dispatch] = useReducer(reducer, initialState);
+    const [state, dispatch] = useReducer<NotesState, [NotesAction]>(reducer, initialState);
     const [loading, setLoading] = useState<boolean>(true);
 
     const [notesToView, setNotesToView] = useState<Array<INote>>([]);
@@ -98,11 +112,11 @@ export default function NotesPage() {
     const stateStyleHandler = (status: UrgencyLevelEnum) => {
         switch (status) {
             case UrgencyLevelEnum.HIGH:
-                return "text-red-600  bg-red-100 border-red-300";
+                return "text-red-700 bg-red-100/90 border-red-200";
             case UrgencyLevelEnum.MEDIUM:
-                return "text-yellow-600  bg-yellow-100 border-yellow-300";
+                return "text-amber-700 bg-amber-100/90 border-amber-200";
             default:
-                return "text-green-600  bg-green-100 border-green-300";
+                return "text-emerald-700 bg-emerald-100/90 border-emerald-200";
         }
     }
     
@@ -137,27 +151,27 @@ export default function NotesPage() {
     }, [state]);
 
     return (
-        <div className="p-3 sm:p-4 md:p-5 lg:p-6 bg-gray-100 min-h-dvh w-full rounded-xl gap-4 sm:gap-5 flex flex-col border-2 border-gray-200">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-2 sm:mt-4 px-2 sm:px-3 w-full gap-3 sm:gap-0">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-4">Note List</h2>
+        <div className="flex min-h-dvh w-full flex-col gap-5 rounded-2xl border border-border/70 bg-background/80 p-4 md:p-6">
+            <div className="mt-2 flex w-full flex-col items-start justify-between gap-3 px-1 sm:flex-row sm:items-center">
+                <h2 className="text-2xl font-bold tracking-tight">Lista de notas</h2>
                 <div className="relative w-full sm:w-auto">
-                    <PlusCircle className="absolute scale-75 sm:scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light text-white" />
-                    <Button onClick={() => router.push('/dashboard/notes/new')} className="bg-blue-500 pl-9 sm:pl-10 pr-3 py-2 w-full sm:w-auto text-sm sm:text-base">Crear nueva nota</Button>
+                    <PlusCircleIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary-foreground" />
+                    <Button onClick={() => router.push('/dashboard/notes/new')} className="h-10 w-full pl-9 pr-4 text-sm sm:w-auto">Crear nueva nota</Button>
                 </div>
             </div>
-            <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="relative w-full">
-                    <Search className="absolute scale-75 sm:scale-90 left-2 top-1/2 transform -translate-y-1/2 font-light" />
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-[1.4fr_auto_auto_auto]">
+                <div className="relative w-full md:min-w-65">
+                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                    className="pl-9 sm:pl-10 pr-3 py-2 w-full bg-white text-sm sm:text-base"
-                    placeholder="buscar por titulo"
+                    className="h-10 w-full border-border/80 bg-card pl-10 pr-3 text-sm"
+                    placeholder="Buscar por titulo"
                     onChange={(e) => {
                         DebouncedFetch(e.target.value);
                     }}
                 />
                 </div>
-                <Select onValueChange={(value) => dispatch({ type: 'SET_URGENCY', payload: value })}>
-                    <SelectTrigger className="w-full h-9 sm:h-10 bg-white text-sm sm:text-base">
+                <Select value={state.urgency ?? "all"} onValueChange={(value) => dispatch({ type: 'SET_URGENCY', payload: value })}>
+                    <SelectTrigger className="h-10 w-full border-border/80 bg-card text-sm md:w-45">
                         <SelectValue placeholder="Filtrar por urgencia" />
                     </SelectTrigger>
                     <SelectContent >
@@ -167,50 +181,50 @@ export default function NotesPage() {
                         <SelectItem value={UrgencyLevelEnum.HIGH}>{UrgencyLevelEnum.HIGH}</SelectItem>
                     </SelectContent>
                 </Select>
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4">
-                    <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
-                        <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            id="date"
-                            className="w-full sm:w-48 h-9 sm:h-10 gap-2 sm:gap-4 font-semibold items-center justify-start text-sm sm:text-base md:text-lg"
-                        >
-                        <CalendarIcon className="scale-100 sm:scale-120 flex-shrink-0" />
-                            <span className="truncate">{state.date ? state.date.toLocaleDateString() : "Select date"}</span>
-                        </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-                        <Calendar
-                            mode="single"
-                            selected={state.date}
-                            captionLayout="dropdown"
-                            onSelect={(date) => {
-                            dispatch({ type: 'SET_DATE', payload: date });
-                            setOpenCalendar(false)
-                            }}
-                        />
-                        </PopoverContent>
-                    </Popover>
+                <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
+                    <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        id="date"
+                        className="h-10 w-full justify-start gap-2 border-border/80 bg-card text-sm md:w-42.5"
+                    >
+                    <CalendarDaysIcon className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{state.date ? state.date.toLocaleDateString() : "Fecha"}</span>
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                    <Calendar
+                        mode="single"
+                        selected={state.date ?? undefined}
+                        captionLayout="dropdown"
+                        onSelect={(date) => {
+                        dispatch({ type: 'SET_DATE', payload: date ?? null });
+                        setOpenCalendar(false)
+                        }}
+                    />
+                    </PopoverContent>
+                </Popover>
+                <div className="grid grid-cols-2 gap-2 md:flex md:gap-2">
                     <Button onClick={() => {
                         setOrderDate(orderDate === "Ascendente" ? "Descendente" : "Ascendente")
-                        setNotesToView(notesToView.reverse());
-                    }} variant={'outline'} className="w-full sm:w-auto h-9 sm:h-10 gap-2 sm:gap-4 font-semibold items-center justify-start text-sm sm:text-base md:text-lg"><ArrowUpNarrowWide className="scale-100 sm:scale-120 flex-shrink-0"/><span className="truncate">Ordenar: {orderDate}</span></Button>
-                    <Button variant={'outline'} className="w-full sm:w-auto h-9 sm:h-10 gap-2 sm:gap-4 font-semibold items-center justify-start text-sm sm:text-base md:text-lg" onClick={() => {
+                        setNotesToView([...notesToView].reverse());
+                    }} variant={'outline'} className="h-10 gap-2 border-border/80 bg-card px-3 text-sm"><ArrowsUpDownIcon className="h-4 w-4"/><span className="truncate">{orderDate}</span></Button>
+                    <Button variant={'outline'} className="h-10 gap-2 border-border/80 bg-card px-3 text-sm" onClick={() => {
                         dispatch({ type: 'RESET' });
-                    }}><RefreshCw className="scale-100 sm:scale-120 flex-shrink-0"/><span className="truncate hidden sm:inline">Resetear filtros</span><span className="truncate sm:hidden">Reset</span></Button>
+                    }}><ArrowPathIcon className="h-4 w-4"/><span className="truncate">Reset</span></Button>
                 </div>
             </div>
             {/* Mejorar tabla con https://tanstack.com/table/v8 */ }
             {/* Vista de tabla para desktop */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden overflow-x-auto rounded-xl border border-border bg-card md:block">
             <Table>
                 <TableHeader>
                     <TableRow className="">
-                        <TableHead className="text-xs lg:text-sm">PACIENTE</TableHead>
-                        <TableHead className="text-xs lg:text-sm">TITULO DE LA NOTA</TableHead>                            
-                        <TableHead className="text-xs lg:text-sm">FECHA DE CREACION</TableHead>
-                        <TableHead className="text-xs lg:text-sm">TIPO</TableHead>
-                        <TableHead className="text-xs lg:text-sm">URGENCIA</TableHead>
+                        <TableHead className="text-sm">PACIENTE</TableHead>
+                        <TableHead className="text-sm">TITULO DE LA NOTA</TableHead>
+                        <TableHead className="text-sm">FECHA DE CREACION</TableHead>
+                        <TableHead className="text-sm">TIPO</TableHead>
+                        <TableHead className="text-sm">URGENCIA</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -218,27 +232,27 @@ export default function NotesPage() {
                         <TableRow>
                             <TableCell colSpan={5} className="text-center py-8">
                                 <div className="flex justify-center items-center">
-                                    <div className="relative w-12 h-12 sm:w-16 sm:h-16">
-                                        <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-                                        <div className="absolute inset-0 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+                                    <div className="relative h-12 w-12">
+                                        <div className="absolute inset-0 rounded-full border-4 border-primary/20"></div>
+                                        <div className="absolute inset-0 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
                                     </div>
                                 </div>
                             </TableCell>
                         </TableRow>
                     ) : (
                     notesToView.length > 0 ? notesToView?.map((note, index) => (
-                            <TableRow className="h-10 text-sm lg:text-base cursor-pointer hover:bg-gray-50" key={note._id?.toString() || `note-${index}`} onClick={ () => router.push(`/dashboard/notes/${note._id}`)}>
+                            <TableRow className="h-12 cursor-pointer text-sm hover:bg-secondary/25" key={note._id?.toString() || `note-${index}`} onClick={ () => router.push(`/dashboard/notes/${note._id}`)}>
                                 <TableCell className="font-medium">{note.patient}</TableCell>
-                                <TableCell className="text-blue-500">{note.title}</TableCell>
+                                <TableCell className="text-primary">{note.title}</TableCell>
                                 <TableCell>{new Date(note.createdAt).toLocaleDateString()}</TableCell>
                                 <TableCell>{note.noteType}</TableCell>
-                                <TableCell><span className={`${stateStyleHandler(note.urgencyLevel)} font-semibold rounded-full text-center p-1 px-2 lg:px-3 border-2 text-xs lg:text-sm`}>{note.urgencyLevel}</span></TableCell>
+                                <TableCell><span className={`${stateStyleHandler(note.urgencyLevel)} rounded-full border px-3 py-1 text-xs font-semibold`}>{note.urgencyLevel}</span></TableCell>
                             </TableRow>
                         ))
                         :
                         (
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center py-4 text-base lg:text-lg text-gray-500">
+                                <TableCell colSpan={5} className="py-6 text-center text-base text-muted-foreground">
                                     No se encontraron notas.
                                 </TableCell>
                             </TableRow>
@@ -249,44 +263,44 @@ export default function NotesPage() {
             </div>
             
             {/* Vista de cards para móvil */}
-            <div className="md:hidden flex flex-col gap-3">
+            <div className="flex flex-col gap-3 md:hidden">
                 { loading ? (
                     <div className="flex justify-center items-center py-8">
-                        <div className="relative w-12 h-12">
-                            <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-                            <div className="absolute inset-0 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+                        <div className="relative h-12 w-12">
+                            <div className="absolute inset-0 rounded-full border-4 border-primary/20"></div>
+                            <div className="absolute inset-0 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
                         </div>
                     </div>
                 ) : (
                     notesToView.length > 0 ? notesToView?.map((note, index) => (
                         <div 
                             key={note._id?.toString() || `note-${index}`}
-                            className="bg-white rounded-lg p-4 border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+                            className="cursor-pointer rounded-xl border border-border bg-card p-4 shadow-sm transition-all hover:shadow-md"
                             onClick={() => router.push(`/dashboard/notes/${note._id}`)}
                         >
                             <div className="flex justify-between items-start mb-2">
-                                <h3 className="font-semibold text-blue-500 text-base flex-1">{note.title}</h3>
-                                <span className={`${stateStyleHandler(note.urgencyLevel)} font-semibold rounded-full text-center px-2 py-0.5 border text-xs ml-2 flex-shrink-0`}>
+                                <h3 className="flex-1 text-base font-semibold text-primary">{note.title}</h3>
+                                <span className={`${stateStyleHandler(note.urgencyLevel)} ml-2 shrink-0 rounded-full border px-2 py-0.5 text-center text-xs font-semibold`}>
                                     {note.urgencyLevel}
                                 </span>
                             </div>
-                            <div className="space-y-1 text-sm text-gray-600">
+                            <div className="space-y-1 text-sm text-muted-foreground">
                                 <p><span className="font-medium">Paciente:</span> {note.patient}</p>
                                 <p><span className="font-medium">Tipo:</span> {note.noteType}</p>
-                                <p className="truncate"><span className="font-medium">contenido:</span> {note.content}</p>
+                                <p className="line-clamp-2"><span className="font-medium">Contenido:</span> {note.content}</p>
                                 <p><span className="font-medium">Fecha:</span> {new Date(note.createdAt).toLocaleDateString()}</p>
                             </div>
                         </div>
                     ))
                     :
                     (
-                        <div className="bg-white rounded-lg p-8 text-center text-gray-500">
+                        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
                             No se encontraron notas.
                         </div>
                     )
                 )}
             </div>
-            <Pagination className="flex justify-center mt-4 h-auto">
+            <Pagination className="mt-2 flex h-auto justify-center">
 
                 {
                     state.skip === 1 ? null : (
@@ -302,12 +316,12 @@ export default function NotesPage() {
                     {
                         state.skip > 1 && (
                             <PaginationItem>
-                                <PaginationLink className="px-2 sm:px-3 text-xs sm:text-sm" >{state.skip - 1}</PaginationLink>
+                                <PaginationLink className="px-2 text-xs sm:px-3 sm:text-sm" >{state.skip - 1}</PaginationLink>
                             </PaginationItem>
                         )
                     }
                     <PaginationItem>
-                        <PaginationLink className="px-2 sm:px-3 text-xs sm:text-sm"  isActive>{state.skip}</PaginationLink>
+                        <PaginationLink className="px-2 text-xs sm:px-3 sm:text-sm"  isActive>{state.skip}</PaginationLink>
                     </PaginationItem>
                     { state.skip + 1 >= totalPage ? null :  (
                         <PaginationEllipsis className="hidden sm:block" />

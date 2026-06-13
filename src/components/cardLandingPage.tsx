@@ -1,15 +1,14 @@
-import { Icon } from 'lucide-react';
 import React from 'react';
 
 //esta card es para el landind page en la seccion de caracteristicas y impulsores
-function CardLandingPage({ icon, title, description, width, height }: { icon: React.ReactElement<{ className?: string }>; title: string; description: string; width?: string; height?: string }) {  
+function CardLandingPage({ icon: Icon, title, description }: { icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; title: string; description: string }) {
     return (
-        <div className={`w-[${width || 200}px] h-[${height || 200}px] border border-gray-300 rounded-lg p-6 flex flex-col items-center text-center gap-4 hover:shadow-lg transition-shadow duration-300`}>
-            {React.isValidElement(icon) && React.cloneElement(icon, { 
-                className: `${icon.props.className || ' w-16 h-16 text-blue-500'} mb-4` 
-            })}
-            <h2 className='text-lg font-semibold'>{title}</h2>
-            <p className='text-sm text-gray-600'>{description}</p>
+        <div className="group h-full rounded-2xl border border-border/80 bg-card/90 p-6 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl">
+            <div className="mb-4 inline-flex rounded-xl bg-secondary/70 p-3 text-primary">
+                <Icon className="h-7 w-7" />
+            </div>
+            <h2 className='text-lg font-semibold text-card-foreground'>{title}</h2>
+            <p className='mt-2 text-sm leading-relaxed text-muted-foreground'>{description}</p>
         </div>
     )
 }

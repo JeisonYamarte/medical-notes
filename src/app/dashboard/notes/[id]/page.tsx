@@ -30,9 +30,6 @@ import {
     UrgencyLevelEnum, 
     NoteType
 } from '@/lib/schemas/noteSchema';
-import { 
-    getContextualPrediction
-} from '@/service/IAservice';
 
 
 
@@ -176,17 +173,40 @@ export default function NewNotePage(props: { params: Params }) {
             setIsPredicting(true);
             const sizeWindows = window.innerWidth;
             onSubmit();
-            const predict = getContextualPrediction(text) //useCompletions (libreria) podriia mejorar esto, incluso con el stop()
-            .then((res) => {
-                setPrediction(res);
-                setIsPredicting(false);
-                
-                if (sizeWindows < 780) {
-                    toast.message(' Press the text to add.');
-                } else {
-                    toast.message(' Press TAB to accept the prediction.');
-                }
-            });
+            fetch('/api/ai/prediction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text }),
+            })
+                .then(async (response) => {
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData?.error || 'Prediction request failed');
+                    }
+
+                    const data = await response.json();
+                    const predictedText = typeof data?.prediction === 'string' ? data.prediction : '';
+                    setPrediction(predictedText);
+
+                    if (!predictedText) {
+                        return;
+                    }
+
+                    if (sizeWindows < 780) {
+                        toast.message(' Press the text to add.');
+                    } else {
+                        toast.message(' Press TAB to accept the prediction.');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Prediction error:', error);
+                    setPrediction('');
+                })
+                .finally(() => {
+                    setIsPredicting(false);
+                });
         }, 2000);
     }
 
@@ -361,13 +381,13 @@ export default function NewNotePage(props: { params: Params }) {
                             {
                                 isDragActive ?
                                 <p className="text-sm sm:text-base">Drop the files here ...</p> :
-                                <p className="text-xs sm:text-sm">Drag 'n' drop some files here, or click to select files</p>
+                                <p className="text-xs sm:text-sm">Drag &apos;n&apos; drop some files here, or click to select files</p>
                             }
                             {fileRejections.length > 0 && (
                                 <div className="text-red-500 mt-2 text-xs sm:text-sm">
                                     {fileRejections.map(({ file }) => (
                                         <div key={file.name}>
-                                            <p>File "{file.name}" was rejected: only PDF files are allowed.</p>
+                                            <p>File &quot;{file.name}&quot; was rejected: only PDF files are allowed.</p>
                                         </div>
                                     ))}
                                 </div>

@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models, Document, Model, Types } from 'mongoose';
+import { Schema, model, models, Document, Model, Types } from 'mongoose';
 import bcrypt from "bcrypt"
 
 export interface IUser extends Document {
@@ -21,7 +21,7 @@ const userSchema = new Schema<IUser>({
     },
     email: {
         type: String,
-        rrequired: [true, 'the emaail is required'],
+        required: [true, 'the email is required'],
         unique: true,
         lowercase: true,
         trim: true,
