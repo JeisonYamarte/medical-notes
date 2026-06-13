@@ -19,15 +19,8 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 
-import type { PdfUploadType } from '@/lib/schemas/pdfSchema'
 import { CardListPDF } from '@/components/cardListPDF'
 import { CardPDFsUpload } from '@/components/cardPDFsUpload' 
-import {
-    savePdfMetadata, 
-    saveEmbeddingText,
-    deletePdfById
-} from '@/service/pdfService'
-import { uploadPDF } from '@/service/cloudinaryService'
 
 
 
@@ -66,31 +59,29 @@ export default function UploadPage() {
     const handlePdf = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
+        if (handlerPdf.length === 0) {
+            return;
+        }
+
         setIsUploading(true);
         setProgressBar(10);
 
         const formData = new FormData();
         formData.append('file', handlerPdf[0]); 
-        
-        uploadPDF(formData)
-            .then((result) => {
-                setProgressBar(70);
-                if (result.status === 200 && result.url) {
-                    const pdfData: PdfUploadType = {
-                        fileName: handlerPdf[0].name,
-                        originalName: handlerPdf[0].name,
-                        fileUrl: result.url, // Usa la URL retornada
-                        fileSize: handlerPdf[0].size,
-                    }
-                    
-                    return savePdfMetadata(pdfData);
-                }
-            })
-            .then((result) => {
+
+        fetch('/api/pdf/process', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(async (response) => {
                 setProgressBar(90);
-                if(result && result.status === 200 && result.pdfId) {
-                    return saveEmbeddingText(formData, result.pdfId);
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData?.error || 'Error processing PDF');
                 }
+
+                return response.json();
             })
             .then(() => {
                 setProgressBar(100);
@@ -100,6 +91,8 @@ export default function UploadPage() {
             })
             .catch((error) => {
                 console.error('Error uploading PDF:', error);
+                setIsUploading(false);
+                setProgressBar(0);
             })
     }
 
@@ -108,18 +101,24 @@ export default function UploadPage() {
 
         setIsDeleting(true);
 
-        deletePdfById(selectedPdf.id)
-            .then((result) => {
-                if (result.status === 200) {
+        fetch(`/api/pdf/${selectedPdf.id}`, {
+            method: 'DELETE',
+        })
+            .then(async (response) => {
+                const result = await response.json().catch(() => ({ success: false, message: 'Error deleting PDF' }));
+
+                if (response.ok && result.success) {
                     setOpenDialog(false);
                     setIsDeleting(false);
                     setSelectedPdf(null);
                     setIsListLoading(true);
                 } else {
-                    console.error('Error deleting PDF:', result.message);
+                    setIsDeleting(false);
+                    console.error('Error deleting PDF:', result.message || 'Error deleting PDF');
                 }
             })
             .catch((error) => {
+                setIsDeleting(false);
                 console.error('Error deleting PDF:', error);
             });
     };

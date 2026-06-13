@@ -1,4 +1,4 @@
-"use server"
+import 'server-only';
 import { extractText } from 'unpdf';
 import { type PdfUploadType } from '../lib/schemas/pdfSchema';
 import { getServerSession } from 'next-auth';
